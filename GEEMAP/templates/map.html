@@ -1,0 +1,192 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+    <title>IS-SAR</title>
+    <link rel="stylesheet" href="{% static 'style_map.css' %}">
+    <link rel="icon" href="{% static 'colombia.png' %}">
+    {{ map.header.render|safe }}
+</head>
+<body>
+    <div class="container" id="loader">
+        <div class="lds-ellipsis">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+    <div class="map">
+        {{ map.html.render|safe }}
+    </div>
+    
+    <div class="navbar">
+        <div class="containernav">
+            <div class="images">
+                <img src="{% static 'logo.png' %}" alt="" class="image">
+            </div>
+            <div class="container_opt">
+                <div class="date">
+                    <p>Fecha última imágen disponible </p>
+                    <p>{{actual_date}}</p>
+                </div>
+                <div class="container_a_1">
+                    <a href="#" id="info" class="info">
+                        <div class="icons">
+                            <i class='bx bx-info-circle'></i>
+                            <span class="tooltiptext">Información</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="container_a_2">
+                    <a href="{% url 'point' %}">
+                        <div class="icons">
+                            <i class='bx bxs-map' ></i>
+                            <span class="tooltiptext">Puntos guardados</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="container_a_3">
+                    <a href="{% url 'polygon' %}">
+                        <div class="icons">
+                            <i class='bx bx-square'></i>
+                            <span class="tooltiptext">Dibujar poligono</span>
+                        </div>
+                    </a>
+                </div>
+                {% if user.is_authenticated %}
+                <div class="container_a_4">
+                    <a href="{% url 'logout' %}">
+                        <div class="icons">
+                            <i class='bx bx-user-circle'></i>
+                            <span class="tooltiptext">{{ user.username }}</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="container_a_5">
+                    <a href="#" id="ppc" class="ppc">
+                        <div class="icons">
+                            <i class='bx bx-cloud-rain'></i>
+                            <span class="tooltiptext">Pronóstico de riego</span>
+                        </div>
+                    </a>
+                </div>
+                {% else %}
+                <div class="container_a_4">
+                    <a href="{% url 'login' %}">
+                        <div class="icons">
+                            <i class='bx bx-user-circle'></i>
+                            <span class="tooltiptext">Iniciar sesión</span>
+                        </div>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!--Modal de información-->
+
+    <div class="bg-modal">
+        <div class="modal-contents">
+    
+            <div class="close">+</div>
+            
+    
+            <h1>IS-SAR</h1>
+            <p>
+                Esta es una aplicación web que permite tener un pronóstico de riego a través de imágenes satelitales,
+                las cuales son obtenidas a través de <strong>Sentinel 1</strong>. <br>
+                A día de hoy solo es posible hacer predicción para la zona del Valle del Cauca.
+            </p>
+            <p>Equipo de trabajo:</p>
+            <p><strong>Edwin Erazo Mesa</strong></p>
+            <p><strong>Paulo J. Murillo Sandoval</strong></p>
+            <p><strong>Joaquín Guillermo Ramírez Gil</strong></p>
+            <p><strong>Andrés Echeverri Sánchez</strong></p>
+            <p><strong>Kevin Quiroga Benavides</strong></p>
+    
+        </div>
+    </div>
+
+    <div class="bg-modal1">
+        <div class="modal-contents1">
+            <div>
+                <h2>Predicción de riego</h2>
+            </div>
+            <div class="close1">+</div>
+            <div class = "image_r1">
+                <img src="{% static 'riego.png' %}" alt="" class = "image_r">
+            </div>
+            <br>
+            <br>
+            {% if color_alert == 'Red' %}
+                <div class="color">
+                    <img src="{% static 'red.png' %}" alt="" class="image_alert">
+                </div>
+            {% elif color_alert == 'Yellow' %}
+                <div class="color">
+                    <img src="{% static 'yellow.png' %}" alt="" class="image_alert">
+                </div>
+            {% elif color_alert == 'Green' %}
+                <div class="color">
+                    <img src="{% static 'green.png' %}" alt="" class="image_alert">
+                </div>
+            {% else %}
+                <div class="color" style="background: white;"></div>
+            {% endif %}
+
+            {% if lamina == None %}
+                <div>
+                    Se debe insertar poligono para ver riego!!
+                </div>
+            {% else %}          
+                <div class="lam">
+                    <h4>Se debe aplicar: {{ lamina }} mm</h4>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Scripts de Javascript y Jquery -->
+    <script> {{ map.script.render | safe }}</script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        document.getElementById('info').addEventListener("click", function() {
+	        document.querySelector('.bg-modal').style.display = "flex";
+        });
+
+        document.querySelector('.close').addEventListener("click", function() {
+            document.querySelector('.bg-modal').style.display = "none";
+        });
+    </script>
+
+    <script>
+        document.getElementById('ppc').addEventListener("click", function() {
+            document.querySelector('.bg-modal1').style.display = "flex";
+        });
+
+        document.querySelector('.close1').addEventListener("click", function() {
+            document.querySelector('.bg-modal1').style.display = "none";
+        });
+    </script>
+    <script>
+            $.ajax({
+                url: '/',
+                type: "GET",
+                dataType: "json",
+                success: (data) => {
+                    console.log(data);
+                },
+                error: (error) => {
+                    console.log(error);
+                }
+                });
+    </script>
+</body>
+</html>

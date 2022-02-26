@@ -1,0 +1,61 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'style_form.css' %}">
+    <link rel="icon" href="{% static 'colombia.png' %}">
+    <title>Inicio de sesión</title>
+</head>
+<body>
+    <div class="box-form">
+        <div class="left">
+            <div class="overlay">
+                <h1>
+                    IS-SAR
+                </h1>
+            </div>
+        </div>
+        
+        <div class="right">
+            <h5>Registro</h5>
+        <p>Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a> </p>
+        <form action="" method="POST" class="formulario">
+
+            {% csrf_token %}
+        <div class="inputs">
+            <div>
+                Nombre usuario: {{ form.username }}
+            </div>
+            <br>
+            <div>
+                Primer nombre: {{ form.first_name}}
+            </div>
+            <br>
+            <div>
+                Apellido: {{ form.last_name}}
+            </div>
+            <br>
+            <div>
+                Email: {{ form.email}}
+            </div>
+            <br>
+            <div>
+                Contraseña: {{ form.password1}}
+            </div>
+            <br>
+            <div>
+                Confirme contraseña: {{ form.password2}}
+            </div>
+        </div>
+                
+        <br><br>
+        <input type="submit" name="Login" class="button" value="Registrarme">
+        </div>
+        </form>
+    </div>
+</body>
+</html>

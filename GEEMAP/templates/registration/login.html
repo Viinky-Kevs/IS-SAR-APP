@@ -1,0 +1,55 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'style_form.css' %}">
+    <link rel="icon" href="{% static 'colombia.png' %}">
+    <title>Inicio de sesión</title>
+</head>
+<body>
+    <div class="box-form">
+        <div class="left">
+            <div class="overlay">
+                <h1>
+                    IS-SAR
+                </h1>
+            </div>
+        </div>
+        
+        <div class="right">
+            <h5>Login</h5>
+        <p>No tienes cuenta? <a href="{% url 'registration' %}">Crea tu cuenta</a> </p>
+        <form action="" method="POST" class="formulario">
+
+            {% csrf_token %}
+        <div class="inputs">
+            <div>
+				Nombre de usuario: {{ form.username }}
+			</div>
+			<br>
+			<div>
+				Contraseña: {{ form.password }}
+			</div>
+        </div>
+                
+                <br><br>
+                
+        <div class="remember-me--forget-password">
+                    <!-- Angular -->
+            <label>
+                <input type="checkbox" name="item" checked/>
+                <span class="text-checkbox">Recordarme</span>
+            </label>
+            <p>Olvidaste la contraseña?</p>
+        </div>
+        <br>
+        <input type="submit" name="Login" class="button" value="Iniciar sesión">
+        </div>
+        </form>
+    </div>
+</body>
+</html>

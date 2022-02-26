@@ -1,0 +1,27 @@
+.container_a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    border-style: solid;
+    border-radius: 15px;
+    width: 500px;
+    height: 400px;
+}
+
+.formulario {
+    padding: 50px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.button {
+    cursor: pointer;
+}

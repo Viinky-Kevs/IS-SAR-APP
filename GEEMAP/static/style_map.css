@@ -1,0 +1,357 @@
+* {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+/* Pre-loader */
+
+.hidden {
+    overflow: hidden;
+}
+
+.container {
+    position: absolute;
+    background: cornsilk;
+}
+
+.lds-ellipsis {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+  .lds-ellipsis div {
+    position: absolute;
+    top: 33px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: black;
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+  }
+  .lds-ellipsis div:nth-child(1) {
+    left: 8px;
+    animation: lds-ellipsis1 0.6s infinite;
+  }
+  .lds-ellipsis div:nth-child(2) {
+    left: 8px;
+    animation: lds-ellipsis2 0.6s infinite;
+  }
+  .lds-ellipsis div:nth-child(3) {
+    left: 32px;
+    animation: lds-ellipsis2 0.6s infinite;
+  }
+  .lds-ellipsis div:nth-child(4) {
+    left: 56px;
+    animation: lds-ellipsis3 0.6s infinite;
+  }
+
+/* Mapa */
+
+body {
+  width: 100%;
+  height: 100vh;
+}
+
+.map {
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    z-index: 1;
+}
+
+.navbar {
+    position: absolute;
+    width: 500px;
+    height: 30px;
+    z-index: 3;
+    left: 70px;
+    top: 10px;
+}
+
+.containernav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    z-index: 3;
+}
+
+.date {
+    margin: 2px;
+    border-radius: 10px;
+    background:burlywood;
+    font-weight: 300;
+    font-size: 15px;
+    width: 200px;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+a:link {
+    text-decoration: none;
+}
+
+.icons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px;
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    background: burlywood;
+}
+
+i {
+    font-size: 20px;
+    color: black;
+}
+
+.bg-modal {
+  background-color: rgba(0, 0, 0, 0.8);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+  border-radius: 15px;
+}
+
+.bg-modal1 {
+  background-color: rgba(0, 0, 0, 0.8);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+  border-radius: 15px;
+}
+
+.modal-contents {
+  height: 450px;
+  width: 400px;
+  background-color: white;
+  text-align: center;
+  padding: 20px;
+  position: relative;
+  border-radius: 15px;
+}
+
+.modal-contents1 {
+  height: 350px;
+  width: 400px;
+  background-color: white;
+  text-align: center;
+  padding: 20px;
+  position: relative;
+  border-radius: 15px;
+}
+
+.formu {
+  display: flex;
+  justify-content: center;
+}
+
+input {
+  margin: 15px auto;
+  display: block;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid gray;
+}
+
+.close {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  font-size: 40px;
+  color: black;
+  transform: rotate(45deg);
+  cursor: pointer;
+}
+.close:hover {
+  color: red;
+}
+
+.close1 {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  font-size: 40px;
+  color: black;
+  transform: rotate(45deg);
+  cursor: pointer;
+}
+.close1:hover {
+  color: red;
+}
+
+
+.image {
+  width: 50px;
+  z-index: 999;
+}
+
+.container_opt {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 250px;
+}
+
+@keyframes lds-ellipsis1 {
+    0% {
+      transform: scale(0);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes lds-ellipsis3 {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(0);
+    }
+  }
+  @keyframes lds-ellipsis2 {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(24px, 0);
+    }
+  }
+
+.container_a_1 .icons .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 3;
+    top: 100%;
+    left: 50%;
+    margin-left: 25px;
+    margin-top: 25px;
+  }
+.container_a_1:hover .tooltiptext {
+    visibility: visible;
+  }
+
+.container_a_2 .icons .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 3;
+    top: 100%;
+    margin-top: 25px;
+    left: 50%;
+    margin-left: 95px;
+  }
+.container_a_2:hover .tooltiptext {
+    visibility: visible;
+  }
+
+.container_a_3 .icons .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 3;
+    top: 100%;
+    margin-top: 25px;
+    left: 50%;
+    margin-left: 165px;
+  }
+.container_a_3:hover .tooltiptext {
+    visibility: visible;
+  }
+
+.container_a_4 .icons .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 3;
+    top: 100%;
+    margin-top: 25px;
+    left: 50%;
+    margin-left: 235px;
+  }
+.container_a_4:hover .tooltiptext {
+    visibility: visible;
+  }
+
+.container_a_5 .icons .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 3;
+    top: 100%;
+    margin-top: 25px;
+    left: 50%;
+    margin-left: 305px;
+  }
+.container_a_5:hover .tooltiptext {
+    visibility: visible;
+  }
+
+.image_r1 {
+  margin-top: 45px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image_r {
+  width: 80%;
+}
+
+.image_alert {
+  width: 20%;
+}
