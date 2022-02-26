@@ -12,7 +12,7 @@ class CustomUser(UserCreationForm):
 		}
 
 class PolygonForm(forms.Form):
-	enter_polygon = forms.CharField(max_length=500)
+	enter_polygon = forms.CharField(widget=forms.Textarea)
 	
 
 class PointForm(forms.Form):

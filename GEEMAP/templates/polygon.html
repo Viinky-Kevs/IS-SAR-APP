@@ -15,18 +15,31 @@
         <div class="container">
             <form action="" method="post" class="formulario">
                 {% csrf_token %}
-                <h3>
+                <h2>
                     Configurar poligono
-                </h3>
+                </h2>
                 <br>
-                Ingrese la data: {{ form.enter_polygon }} 
+                Ingrese el poligono:  
+                <br>
+                <br>
+                {{ form.enter_polygon }}
                 <br>
                 <br>
                 <input type="submit" value="configurar" class="button">
                 <br>
                 <br>
                 <a href="{% url 'map' %}">Volver al mapa</a>
+                <br>
+                <br>
+                <a href="{% url 'point' %}">Ir a puntos guardados</a>
             </form>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <strong>IS-SAR</strong>
         </div>
     </div>
 </body>

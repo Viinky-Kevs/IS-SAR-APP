@@ -140,7 +140,7 @@ i {
 }
 
 .modal-contents {
-  height: 450px;
+  height: 420px;
   width: 400px;
   background-color: white;
   text-align: center;
@@ -150,7 +150,7 @@ i {
 }
 
 .modal-contents1 {
-  height: 350px;
+  height: 400px;
   width: 400px;
   background-color: white;
   text-align: center;
@@ -338,6 +338,27 @@ input {
     margin-left: 305px;
   }
 .container_a_5:hover .tooltiptext {
+    visibility: visible;
+  }
+
+.container_a_6 .icons .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 3;
+    top: 100%;
+    margin-top: 25px;
+    left: 50%;
+    margin-left: 375px;
+  }
+.container_a_6:hover .tooltiptext {
     visibility: visible;
   }
 

@@ -278,9 +278,19 @@ class map(TemplateView):
                 lam = 0
                 color_alert = 'Green'
             
-            Map.addLayer(s1_preprocces_view.first(), visparam, 'Processed_image', True, 0.5)
+            #Map.addLayer(s1_preprocces_view.first(), visparam, 'Processed_image', True, 0.5)
 
-            Map.addLayer(geometry_user, {'color': 'FF0000'}, 'geodesic polygon')
+            sentinel1 = ee.Image(ee.ImageCollection('COPERNICUS/S1_GRD') 
+                       .filterBounds(geometry_user) 
+                       .filterDate(ee.Date('2022-02-11'), ee.Date('2022-02-23')) 
+                       .first() 
+                       .clip(geometry_user))
+            
+            Map.addLayer(sentinel1, {'min': [-20, -25, 1], 'max': [0, -5, 15]}, 'Plygon image', True)
+
+            Map.addLayer(geometry_user, {'color': 'FF0000'}, 'geodesic polygon', True, 0.2)
+
+            Map.setCenter(centroide[0],centroide[1], zoom = 16)
 
             Map.add_to(figure)
 
@@ -402,6 +412,9 @@ def polygon(request):
         form = PolygonForm(request.POST)
         if form.is_valid():
             enter_polygon = form.cleaned_data['enter_polygon']
+
+            if len(coordenadas) > 0:
+                coordenadas.clear()
 
             coordenadas.append(enter_polygon)
             

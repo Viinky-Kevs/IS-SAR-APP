@@ -13,23 +13,32 @@
 <body>
     <div class="container_a">
         <div class="container">
+            <br>
             <form action="" method="post" class="formulario">
                 {% csrf_token %}
-                <h3>
-                    Configurar visualización de punto
-                </h3>
+                <h2>
+                    Puntos (poligono) guardados
+                </h2>
                 <br>
-                Coordenada (Lat, Lon): 
+                Selecciona un punto guardado
                 <br>
                 <br>
-                {{ form.Latitud }} {{ form.Longitud }}
+                {{ form.Latitud }}
                 <br>
                 <br>
                 <input type="submit" value="configurar" class="button">
                 <br>
                 <br>
                 <a href="{% url 'map' %}">Volver al mapa</a>
+                <br>
+                <br>
+                <a href="{% url 'polygon' %}">Dibujar poligono</a>
             </form>
+            <br>
+            <br>
+            <br>
+            <br>
+            <h4>IS-SAR</h4>
         </div>
     </div>
 </body>
