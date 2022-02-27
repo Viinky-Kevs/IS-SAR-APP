@@ -9,6 +9,7 @@ import ee
 import folium
 import math
 import json
+import datetime 
 import geemap.foliumap as geemap
 import numpy as np
 import geopandas as gpd
@@ -34,19 +35,16 @@ class map(TemplateView):
             Draw_in_map = False
 
         ## Fecha más reciente
-        '''proveedor = ee.ImageCollection("COPERNICUS/S1_GRD")
+        
+        today = datetime.datetime.now()
+        days_back = datetime.timedelta(days = 14)
+        before = today - days_back
 
-        rango = proveedor.reduceColumns(ee.Reducer.minMax(), ["system:time_start"])
+        today_list = str(today_list)
+        today_list1 = today_list.split(' ')
 
-        recent = ee.Date(rango.get('max'))
-
-        ff = recent.format(None, 'GMT')
-
-        date_recent = ff.getInfo()
-
-        date_r = date_recent.split('T')
-
-        date_r = date_r[0]'''
+        before_list = str(before)
+        before_list1 = before_list.split(' ')
 
         ## Interactive map
 
@@ -64,8 +62,8 @@ class map(TemplateView):
             
             geometry_user = ee.Geometry.Polygon(new_coords)
             
-            parameter = {'START_DATE': "2022-02-11",
-                    'STOP_DATE' : "2022-02-23",#date_r,
+            parameter = {'START_DATE': before_list1[0],
+                    'STOP_DATE' : today_list1[0],
                     'POLARIZATION' : 'VVVH',
                     'ORBIT' : 'BOTH',
                     'ORBIT_NUM' : None,
@@ -266,7 +264,6 @@ class map(TemplateView):
                 
                 lam = 600 * (theta_FC - model_60)
                 
-                
                 if lam >= raw:
                     #Red color
                     color_alert = 'Red'
@@ -386,7 +383,7 @@ class map(TemplateView):
                     visparam['min'] = 0
                     visparam['max'] = 0.2
                     
-            #Map.addLayer(s1_preprocces_view.first(), visparam, 'Processed_image', True, 0.5)
+            Map.addLayer(s1_preprocces_view.first(), visparam, 'Processed_image', True, 0.5)
 
             color_alert = 'White'
 
@@ -396,7 +393,7 @@ class map(TemplateView):
 
             figure.render()
 
-            format_date = "2022-02-23"#date_r
+            format_date = today_list1[0]
 
             print(color_alert)
 
