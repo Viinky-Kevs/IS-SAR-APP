@@ -1,5 +1,5 @@
 branca==0.4.2
-datetime==3.2
+datetime==4.4
 Django==4.0
 earthengine-api==0.1.292
 ee-extra==0.0.10
