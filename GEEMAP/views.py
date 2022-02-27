@@ -40,7 +40,7 @@ class map(TemplateView):
         days_back = datetime.timedelta(days = 14)
         before = today - days_back
 
-        today_list = str(today_list)
+        today_list = str(today)
         today_list1 = today_list.split(' ')
 
         before_list = str(before)
