@@ -17,13 +17,12 @@
             <form action="" method="post" class="formulario">
                 {% csrf_token %}
                 <h2>
-                    Puntos (poligono) guardados
+                    Poligonos guardados de {{user.username}}
                 </h2>
                 <br>
-                Selecciona un punto guardado
+                <h4>Selecciona un punto guardado: </h4>
                 <br>
-                <br>
-                {{ form.Latitud }}
+                {{ form.options }}
                 <br>
                 <br>
                 <input type="submit" value="configurar" class="button">

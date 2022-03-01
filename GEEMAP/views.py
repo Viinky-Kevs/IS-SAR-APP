@@ -2,8 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views.generic import TemplateView
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 
-from .forms import CustomUser, PolygonForm, PointForm
+from .forms import CustomUser, PolygonForm, SavePolygonForm, Polygon2Form
 
 import ee
 import folium
@@ -12,6 +13,7 @@ import json
 import datetime 
 import geemap.foliumap as geemap
 import numpy as np
+import pandas as pd
 import geopandas as gpd
 
 from .helper import add_ratio_lin, lin_to_db2, lin_to_db
@@ -27,10 +29,7 @@ class map(TemplateView):
 
         if len(coordenadas) > 0:
             Draw_in_map = True
-            stud_obj = json.loads(coordenadas[0])
-
-            new_coords = stud_obj['geometry']['coordinates']
-
+            new_coords = coordenadas
         else:
             Draw_in_map = False
 
@@ -403,37 +402,131 @@ class map(TemplateView):
                     "lamina" : lam}
 
 ## Definir poligono
-
+@login_required(login_url='/accounts/login/')
 def polygon(request):
     if request.method == 'POST':
         form = PolygonForm(request.POST)
         if form.is_valid():
             enter_polygon = form.cleaned_data['enter_polygon']
+            name_polygon = form.cleaned_data['name_p']
+            user_name = request.user.get_username()
+
+            stud_obj = json.loads(enter_polygon)
+            new_coords_p = stud_obj['geometry']['coordinates'][0]
+
+            file = pd.read_excel('./media/data.xlsx')
+            file1 = pd.DataFrame(file)
+
+            dataF = pd.DataFrame({'name_user': user_name,
+                     'name_polygon': name_polygon,
+                     'polygon_coords': new_coords_p})
+
+            final_file = file1.append(dataF)
+            final_file.to_excel('./media/data.xlsx', index=False)
 
             if len(coordenadas) > 0:
                 coordenadas.clear()
 
-            coordenadas.append(enter_polygon)
+            coordenadas.append(new_coords_p)
             
             return redirect(to = "map")
     else:
         form = PolygonForm()
+        user_name = request.user.get_username()
+        if user_name:
+                data = pd.DataFrame({'current_user' : [user_name],'id': [1]})
+                data.to_excel('./media/user.xlsx', index=False)
     
     return render(request, 'polygon.html', {'form':form})
 
-## Configurar punto
-
-def point(request):
+@login_required(login_url='/accounts/login/')
+def polygon2(request):
     if request.method == 'POST':
-        form = PointForm(request.POST)
+        form = Polygon2Form(request.POST)
         if form.is_valid():
-            lat = form.cleaned_data['Latitud']
-            lon = form.cleaned_data['fLongitud']
+            first_lat   = form.cleaned_data['first_lat']
+            first_long  = form.cleaned_data['first_long']
+            second_lat  = form.cleaned_data['second_lat']
+            second_long = form.cleaned_data['second_long']
+            third_lat   = form.cleaned_data['third_lat']
+            third_long  = form.cleaned_data['third_long']
+            fourth_lat  = form.cleaned_data['fourth_lat']
+            fourth_long = form.cleaned_data['fourth_long']
+            name_polygon = form.cleaned_data['name_p']
+
+            user_name = request.user.get_name()
+
+            polygon = [[float(first_lat), float(first_long)],
+                        [float(second_lat),float(second_long)],
+                        [float(third_lat),float(third_long)],
+                        [float(fourth_lat),float(fourth_long)]]
+
+            file = pd.read_excel('./media/data.xlsx')
+            file1 = pd.DataFrame(file)
+
+            dataF = pd.DataFrame({'name_user': user_name,
+                     'name_polygon': name_polygon,
+                     'polygon_coords': polygon})
+
+            final_file = file1.append(dataF)
             
+            final_file.to_excel('./media/data.xlsx', index=False)
+
             return redirect(to = "map")
     else:
-        form = PointForm()
-    return render(request, 'point.html', {'form':form})
+        form = Polygon2Form()
+        user_name = request.user.get_username()
+        if user_name:
+                data = pd.DataFrame({'current_user' : [user_name],'id': [1]})
+                data.to_excel('./media/user.xlsx', index=False)
+    
+    return render(request, 'polygon2.html', {'form':form})
+
+
+## Configurar punto
+@login_required(login_url='/accounts/login/')
+def save_polygon(request):
+    if request.method == 'POST':
+        form = SavePolygonForm(request.POST)
+        if form.is_valid():
+            reason = form.cleaned_data['options']
+            reason = dict(form.fields['options'].choices)[reason]
+            file = pd.read_excel('./media/data.xlsx')
+            file1 = pd.DataFrame(file)
+            new_geom = []
+            current_user = request.user.get_username()
+            for i in range(len(file1)):
+                if file1['name_user'][i] == current_user:
+                    if file1['name_polygon'][i] == reason:
+                        new_geom.append(file1['polygon_coords'][i])
+                    else:
+                        continue
+                else:
+                    continue
+            new_coordinates = []
+            for i in new_geom:
+                ff = i.split(',')
+                dd = ff[0].split('[')
+                gg = ff[1].split(']')
+                
+                dd1 = float(dd[1])
+                gg1 = float(gg[0])
+                new_coordinates.append([dd1,gg1])
+
+            if len(coordenadas) > 0:
+                coordenadas.clear()
+
+            coordenadas.append(new_coordinates) 
+
+            return redirect(to = "map")
+    else:
+        form = SavePolygonForm()
+        user_name = request.user.get_username()
+        if user_name:
+                data = pd.DataFrame({'current_user' : [user_name],'id': [1]})
+                data.to_excel('./media/user.xlsx', index=False)
+
+    return render(request, 'SaveP.html', {'form':form})
 
 ## Registro de usuario
 def register_user(request):
@@ -442,7 +535,6 @@ def register_user(request):
         formulario = CustomUser(data = request.POST)
         if formulario.is_valid():
             formulario.save()
-
             user = authenticate(username = formulario.cleaned_data["username"], password = formulario.cleaned_data["password1"])
             login(request, user)
             messages.success(request, "El usuario a sido creado satisfactoriamente")
@@ -451,5 +543,3 @@ def register_user(request):
 
         data["form"] = formulario    
     return render(request, 'registration/register.html', data)
-
-    

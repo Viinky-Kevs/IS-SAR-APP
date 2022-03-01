@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'style_polygon.css' %}">
     <link rel="icon" href="{% static 'colombia.png' %}">
-    <title>Configurar poligono</title>
+    <title>Poligono manual</title>
 </head>
 <body>
     <div class="container_a">
@@ -16,14 +16,27 @@
             <form action="" method="post" class="formulario">
                 {% csrf_token %}
                 <h2>
-                    Configurar poligono
+                    Configurar poligono manual
                 </h2>
                 <br>
                 Ingrese el poligono:  
                 <br>
                 <br>
-                {{ form.enter_polygon }}
+                Primer vertice :  (Latitud, Longitud)
                 <br>
+                {{ form.first_lat }} {{ form.first_long }}
+                <br>
+                Segundo vertice : (Latitud, Longitud)
+                <br>
+                {{ form.second_lat }} {{ form.second_long }}
+                <br>
+                Tercer vertice : (Latitud, Longitud)
+                <br>
+                {{ form.third_lat }} {{ form.third_long }}
+                <br>
+                Cuarto vertice : (Latitud, Longitud)
+                <br>
+                {{ form.fourth_lat }} {{ form.fourth_long }}
                 <br>
                 Nombre del poligono: 
                 <br>
@@ -33,7 +46,7 @@
                 <input type="submit" value="configurar" class="button">
                 <br>
                 <br>
-                ¿Tienes las coordenadas? <a href="{% url 'polygon2' %}">Configuralo manualmente</a>
+                <a href="{% url 'polygon' %}">Volver a dibujar poligono</a>
                 <br>
                 <br>
                 <a href="{% url 'point' %}">Ir a puntos guardados</a>
@@ -41,6 +54,8 @@
                 <br>
                 <a href="{% url 'map' %}">Volver al mapa</a>
             </form>
+            <br>
+            <br>
             <br>
             <br>
             <br>
