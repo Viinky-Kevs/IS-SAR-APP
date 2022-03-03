@@ -1,0 +1,66 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'style_polygon.css' %}">
+    <link rel="icon" href="{% static 'colombia.png' %}">
+    <title>Cargar archivos</title>
+</head>
+<body>
+    <div class="container_a">
+        <div class="container">
+			<form method="POST" enctype="multipart/form-data" class="upload">
+                <h2>
+                    Cargar archivo KML o SHP
+                </h2>
+                <br>
+                <br>
+                <br>
+                <br>
+				{% csrf_token %}
+				<input type="file" name="Archivo" required multiple>
+                <br>
+                <br>
+				<input type="submit" value="Cargar">
+			</form>
+                
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <a href="{% url 'polygon' %}">Volver a dibujar poligono</a>
+                <br>
+                <br>
+                <a href="{% url 'point' %}">Ir a puntos guardados</a>
+                <br>
+                <br>
+                <a href="{% url 'map' %}">Volver al mapa</a>
+            
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <strong>IS-SAR</strong>
+        </div>
+    </div>
+    {% if confirm %}
+    <script>
+        alert('Se ha cargado exitosamente los archivos!')
+    </script>
+    {% else %}
+    <script>
+        alert('Puedes subir uno o más archivos!')
+    </script>
+    {% endif %}
+</body>
+</html>
