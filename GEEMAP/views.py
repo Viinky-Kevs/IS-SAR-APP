@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views.generic import TemplateView
 from django.contrib.auth import authenticate, login
+from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.decorators import login_required
 
 from .forms import CustomUser, PolygonForm, SavePolygonForm, Polygon2Form, ConfiUpForm
@@ -15,6 +16,7 @@ import geemap.foliumap as geemap
 import numpy as np
 import pandas as pd
 import geopandas as gpd
+import datetime
 
 from .helper import add_ratio_lin, lin_to_db2, lin_to_db
 from .wrapper import s1_preproc
@@ -303,14 +305,27 @@ class map(TemplateView):
                     "lamina" : round(lam, 2)}
             
         else:
+            ## Fecha más reciente
+        
+            today = datetime.datetime.now()
+            days_back = datetime.timedelta(days = 14)
+            before = today - days_back
+
+            today_list = str(today)
+            today_list1 = today_list.split(' ')
+
+            before_list = str(before)
+            before_list1 = before_list.split(' ')
+
+
             geometry = ee.Geometry.Polygon(
                 [[[-76.25925273198507, 4.4784853333279475],
                 [-76.86899394292257, 3.5195334529660314],
                 [-76.59433573979757, 3.2947119593342977],
                 [-75.99008769292257, 4.3579948778381965]]])
             
-            parameter = {'START_DATE': "2022-02-11",
-                    'STOP_DATE' : "2022-02-23",#date_r,
+            parameter = {'START_DATE': before_list1[0],
+                    'STOP_DATE' : today_list1[0],
                     'POLARIZATION' : 'VVVH',
                     'ORBIT' : 'BOTH',
                     'ORBIT_NUM' : None,
