@@ -4,13 +4,13 @@ from django.views.generic import TemplateView
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 
-from .forms import CustomUser, PolygonForm, SavePolygonForm, Polygon2Form
+from .forms import CustomUser, PolygonForm, SavePolygonForm, Polygon2Form, ConfiUpForm
 
 import ee
 import folium
+import os
 import math
 import json
-import datetime 
 import geemap.foliumap as geemap
 import numpy as np
 import pandas as pd
@@ -53,9 +53,10 @@ class map(TemplateView):
                          Draw_export = False,
                          plugin_LayerControl = False,
                          location = [4.3, -76.1],
-                         zoom_start = 10)
-        
-        #Map.add_shapefile(in_shp = './media/FC_PWP_map_geo.shp', layer_name = 'PMP y CC')
+                         zoom_start = 10,
+                         plugin_LatLngPopup = False)
+                         
+        Map.add_basemap('HYBRID')
         
         if Draw_in_map == True:
             
@@ -219,7 +220,7 @@ class map(TemplateView):
             
             print(f'Modelo a 60cm: {model_60}')
             
-            shapefile = gpd.read_file('./media/FC_PWP_v2_map_geo.shp')
+            shapefile = gpd.read_file('./media/shapefiles_admin/FC_PWP_v2_map_geo.shp')
 
             def coord_lister(geom):
                 coords = list(geom.exterior.coords)
@@ -414,7 +415,7 @@ def polygon(request):
             stud_obj = json.loads(enter_polygon)
             new_coords_p = stud_obj['geometry']['coordinates'][0]
 
-            file = pd.read_excel('./media/data.xlsx')
+            file = pd.read_excel('./media/excel/data.xlsx')
             file1 = pd.DataFrame(file)
 
             dataF = pd.DataFrame({'name_user': user_name,
@@ -422,7 +423,7 @@ def polygon(request):
                      'polygon_coords': new_coords_p})
 
             final_file = file1.append(dataF)
-            final_file.to_excel('./media/data.xlsx', index=False)
+            final_file.to_excel('./media/excel/data.xlsx', index=False)
 
             if len(coordenadas) > 0:
                 coordenadas.clear()
@@ -435,7 +436,7 @@ def polygon(request):
         user_name = request.user.get_username()
         if user_name:
                 data = pd.DataFrame({'current_user' : [user_name],'id': [1]})
-                data.to_excel('./media/user.xlsx', index=False)
+                data.to_excel('./media/excel/user.xlsx', index=False)
     
     return render(request, 'polygon.html', {'form':form})
 
@@ -470,7 +471,7 @@ def polygon2(request):
 
             final_file = file1.append(dataF)
             
-            final_file.to_excel('./media/data.xlsx', index=False)
+            final_file.to_excel('./media/excel/data.xlsx', index=False)
 
             return redirect(to = "map")
     else:
@@ -478,7 +479,7 @@ def polygon2(request):
         user_name = request.user.get_username()
         if user_name:
                 data = pd.DataFrame({'current_user' : [user_name],'id': [1]})
-                data.to_excel('./media/user.xlsx', index=False)
+                data.to_excel('./media/excel/user.xlsx', index=False)
     
     return render(request, 'polygon2.html', {'form':form})
 
@@ -491,7 +492,7 @@ def save_polygon(request):
         if form.is_valid():
             reason = form.cleaned_data['options']
             reason = dict(form.fields['options'].choices)[reason]
-            file = pd.read_excel('./media/data.xlsx')
+            file = pd.read_excel('./media/excel/data.xlsx')
             file1 = pd.DataFrame(file)
             new_geom = []
             current_user = request.user.get_username()
@@ -523,8 +524,8 @@ def save_polygon(request):
         form = SavePolygonForm()
         user_name = request.user.get_username()
         if user_name:
-                data = pd.DataFrame({'current_user' : [user_name],'id': [1]})
-                data.to_excel('./media/user.xlsx', index=False)
+            data = pd.DataFrame({'current_user' : [user_name],'id': [1]})
+            data.to_excel('./media/excel/user.xlsx', index=False)
 
     return render(request, 'SaveP.html', {'form':form})
 
@@ -543,3 +544,80 @@ def register_user(request):
 
         data["form"] = formulario    
     return render(request, 'registration/register.html', data)
+
+
+@login_required(login_url='/accounts/login/')
+def upload(request):
+    user_name = request.user.get_username()
+    if user_name:
+        data = pd.DataFrame({'current_user' : [user_name],'id': [1]})
+        data.to_excel('./media/excel/user.xlsx', index=False)
+
+    path = './media/'
+    directory_cont = os.listdir(path)
+
+    name_folders = []
+    for i in directory_cont:
+        name_folders.append(i)
+
+    if user_name not in name_folders:
+        new_dir = user_name
+        parent_dir = './media/'
+        path = os.path.join(parent_dir, new_dir)
+        os.mkdir(path)
+        path_name = os.path.join(parent_dir, new_dir)
+    else:
+        new_dir = user_name
+        parent_dir = './media/'
+        path_name = os.path.join(parent_dir, new_dir)
+
+    context = {}
+    if request.method == 'POST':
+        upload_files = request.FILES.getlist('Archivo')
+        for j in upload_files:
+            upload_file = j
+            fs = FileSystemStorage(location = path_name)
+            fs.save(upload_file.name, upload_file)
+
+        context['confirm'] = 'Yes'
+        return redirect(to = 'configurate')
+        
+    context['files'] = os.listdir(path_name)
+    
+    return render(request, 'upload.html', context)
+
+@login_required(login_url='/accounts/login/')
+def Config_up(request):
+    if request.method == 'POST':
+        form = ConfiUpForm(request.POST)
+        if form.is_valid():
+            reason = form.cleaned_data['options']
+            reason = dict(form.fields['options'].choices)[reason]
+            parent_dir = './media/'
+            user_name = request.user.get_username()
+            path = os.path.join(parent_dir, user_name)
+            directory_cont = os.listdir(path)
+            new_file = []
+            for i in directory_cont:
+                if i == reason:
+                    new_file.append(i)
+            file = os.path.join(path, new_file[0])
+            shapefile = gpd.read_file(file)
+
+            def coord_lister(geom):
+                coords = list(geom.exterior.coords)
+                return (coords)
+            tes_list = []
+            coordinates_list = shapefile.geometry.apply(coord_lister)
+            for j in coordinates_list:
+                tes_list.append(j)
+
+            if len(coordenadas) > 0:
+                coordenadas.clear()
+
+            coordenadas.append(tes_list[0])
+
+            return redirect(to='map')
+    else:
+        form = ConfiUpForm()
+    return render(request, 'Config_up.html', {'form': form})

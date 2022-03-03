@@ -7,4 +7,6 @@ urlpatterns = [
     path('configurate/polygon', views.polygon, name='polygon'),
     path('configurate/polygon/manual', views.polygon2, name='polygon2'),
     path('configurate/point', views.save_polygon, name='point'),
+    path('configurate/upload', views.upload, name='upload'),
+    path('configurate/upload/KMZ-SHP', views.Config_up, name='configurate'),
 ]

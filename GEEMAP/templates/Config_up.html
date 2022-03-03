@@ -8,39 +8,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'style_polygon.css' %}">
     <link rel="icon" href="{% static 'colombia.png' %}">
-    <title>Configurar punto</title>
+    <title>Configurar-KML-SHP</title>
 </head>
 <body>
     <div class="container_a">
         <div class="container">
-            <br>
-            <form action="" method="post" class="formulario">
+			<form method="POST" enctype="multipart/form-data" class="upload">
                 {% csrf_token %}
                 <h2>
-                    Poligonos guardados de {{user.username}}
+                    Configurar archivo cargado
                 </h2>
                 <br>
-                <h4>Selecciona un punto guardado: </h4>
+                <h4>Selecciona el archivo para configurar poligono:</h4>
                 <br>
-                {{ form.options }}
-                <br>
-                <br>
-                <input type="submit" value="configurar" class="button">
+				{{ form.options }}
+				<br>
                 <br>
                 <br>
-                <a href="{% url 'polygon' %}">Dibujar poligono</a>
+                <input type="submit" value="configurar">
+			</form>
+                
                 <br>
                 <br>
-                ¿Tienes un archivo cargado? <a href="{% url 'configurate' %}">Seleccionalo</a>
+                <br>
+                <br>
+                <br>
+                <a href="{% url 'upload' %}">Cargar archivos</a>
+                <br>
+                <br>
+                <a href="{% url 'polygon' %}">Volver a dibujar poligono</a>
+                <br>
+                <br>
+                <a href="{% url 'point' %}">Ir a puntos guardados</a>
                 <br>
                 <br>
                 <a href="{% url 'map' %}">Volver al mapa</a>
-            </form>
+            
             <br>
             <br>
             <br>
             <br>
-            <h4>IS-SAR</h4>
+            <br>
+            <br>
+            <strong>IS-SAR</strong>
         </div>
     </div>
 </body>
