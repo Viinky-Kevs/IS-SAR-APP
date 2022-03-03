@@ -27,10 +27,11 @@
     
     <div class="navbar">
         <div class="containernav">
-            <div class="images">
-                <img src="{% static 'logo.png' %}" alt="" class="image">
-            </div>
             <!--<div class="container_opt">-->
+                <div class="images">
+                    <img src="{% static 'logo.png' %}" alt="" class="image">
+                </div>
+                <br>
                 <div class="date" style="text-align: center;">
                     <p>Fecha última imágen disponible: </p>
                     <p>{{actual_date}}</p>
@@ -59,8 +60,16 @@
                         </div>
                     </a>
                 </div>
-                {% if user.is_authenticated %}
                 <div class="container_a_4">
+                    <a href="{% url 'upload' %}">
+                        <div class="icons">
+                            <i class='bx bx-upload'></i>
+                            <span class="tooltiptext">Cargar archivo</span>
+                        </div>
+                    </a>
+                </div>
+                {% if user.is_authenticated %}
+                <div class="container_a_5">
                     <a href="{% url 'logout' %}">
                         <div class="icons">
                             <i class='bx bx-user-circle'></i>
@@ -68,7 +77,7 @@
                         </div>
                     </a>
                 </div>
-                <div class="container_a_5">
+                <div class="container_a_6">
                     <a href="#" id="ppc" class="ppc">
                         <div class="icons">
                             <i class='bx bx-cloud-rain'></i>
@@ -77,7 +86,7 @@
                     </a>
                 </div>
                 {% else %}
-                <div class="container_a_4">
+                <div class="container_a_5">
                     <a href="{% url 'login' %}">
                         <div class="icons">
                             <i class='bx bx-user-circle'></i>
@@ -86,7 +95,7 @@
                     </a>
                 </div>
                 {% endif %}
-                <div class="container_a_6">
+                <div class="container_a_7">
                     <a href="https://github.com/Viinky-Kevs/IS-SAR-APP" target="_blanck">
                         <div class="icons">
                             <i class='bx bxl-github'></i>
