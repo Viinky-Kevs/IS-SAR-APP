@@ -21,17 +21,20 @@ import datetime
 from .helper import add_ratio_lin, lin_to_db2, lin_to_db
 from .wrapper import s1_preproc
 
-coordenadas = []
-
 class map(TemplateView): 
     ee.Initialize()
     template_name = 'map.html'
     
     def get_context_data(request):
 
-        if len(coordenadas) > 0:
+        if os.path.exists('./media/excel/polygon.xlsx'):
             Draw_in_map = True
-            new_coords = coordenadas
+            file = pd.read_excel('./media/excel/polygon.xlsx')
+            new_coords = []
+            for i in range(len(file)):
+                long, lat = file['Longitude'][i], file['Latitude'][i]
+                new_coords.append((long, lat))
+            os.remove('./media/excel/polygon.xlsx')
         else:
             Draw_in_map = False
 
@@ -440,10 +443,17 @@ def polygon(request):
             final_file = file1.append(dataF)
             final_file.to_excel('./media/excel/data.xlsx', index=False)
 
-            if len(coordenadas) > 0:
-                coordenadas.clear()
+            longitude = []
+            latitude = []
 
-            coordenadas.append(new_coords_p)
+            for i in range(len(new_coords_p)):
+                long, lat  = new_coords_p[i][0], new_coords_p[i][1]
+                longitude.append(long)
+                latitude.append(lat)
+
+            data_frame = pd.DataFrame({'Longitude': longitude, 'Latitude': latitude})
+
+            data_frame.to_excel('./media/excel/polygon.xlsx', index=False)
             
             return redirect(to = "map")
     else:
@@ -528,10 +538,17 @@ def save_polygon(request):
             gg1 = float(gg[0])
             new_coordinates.append([dd1,gg1])
 
-        if len(coordenadas) > 0:
-            coordenadas.clear()
-        print(new_coordinates)
-        coordenadas.append(new_coordinates) 
+        longitude = []
+        latitude = []
+
+        for i in range(len(new_coordinates)):
+            long, lat  = new_coordinates[i][0], new_coordinates[i][1]
+            longitude.append(long)
+            latitude.append(lat)
+
+        data_frame = pd.DataFrame({'Longitude': longitude, 'Latitude': latitude})
+
+        data_frame.to_excel('./media/excel/polygon.xlsx', index=False) 
 
         return redirect(to = "map")
 
@@ -609,6 +626,7 @@ def Config_up(request):
     
     if request.method == 'POST':
         data = request.POST['files']
+        print(data, 'hola')
         file = os.path.join(path, data)
         shapefile = gpd.read_file(file)
 
@@ -620,10 +638,19 @@ def Config_up(request):
         for j in coordinates_list:
             tes_list.append(j)
 
-        if len(coordenadas) > 0:
-            coordenadas.clear()
+        new_coordinates = tes_list[0]
+        longitude = []
+        latitude = []
 
-        coordenadas.append(tes_list[0])
+        for i in range(len(new_coordinates)):
+            long, lat  = new_coordinates[i][0], new_coordinates[i][1]
+            longitude.append(long)
+            latitude.append(lat)
+
+        data_frame = pd.DataFrame({'Longitude': longitude, 'Latitude': latitude})
+
+        data_frame.to_excel('./media/excel/polygon.xlsx', index=False) 
+
 
         return redirect(to='map')
     
