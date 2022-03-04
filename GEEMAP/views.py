@@ -398,7 +398,7 @@ class map(TemplateView):
                     visparam['min'] = 0
                     visparam['max'] = 0.2
                     
-            Map.addLayer(s1_preprocces_view.first(), visparam, 'Processed_image', True, 0.5)
+            #Map.addLayer(s1_preprocces_view.first(), visparam, 'Processed_image', True, 0.5)
 
             color_alert = 'White'
 
