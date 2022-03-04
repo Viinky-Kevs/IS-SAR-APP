@@ -22,7 +22,11 @@
                 <br>
                 <h4>Selecciona un punto guardado: </h4>
                 <br>
-                {{ form.options }}
+                <select id="files" name="files">
+                    {% for i in lista %}
+                    <option value="{{i}}" name="choose">{{i}}</option>
+                    {% endfor %}
+                </select>
                 <br>
                 <br>
                 <input type="submit" value="configurar" class="button">
@@ -31,7 +35,7 @@
                 <a href="{% url 'polygon' %}">Dibujar poligono</a>
                 <br>
                 <br>
-                ¿Tienes un archivo cargado? <a href="{% url 'configurate' %}">Seleccionalo</a>
+                <h4>¿Tienes un archivo cargado? <a href="{% url 'configurate' %}">Seleccionalo</a></h4>
                 <br>
                 <br>
                 <a href="{% url 'map' %}">Volver al mapa</a>

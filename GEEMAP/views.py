@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login
 from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.decorators import login_required
 
-from .forms import CustomUser, PolygonForm, SavePolygonForm, Polygon2Form, ConfiUpForm
+from .forms import CustomUser, PolygonForm, Polygon2Form
 
 import ee
 import folium
@@ -448,10 +448,6 @@ def polygon(request):
             return redirect(to = "map")
     else:
         form = PolygonForm()
-        user_name = request.user.get_username()
-        if user_name:
-                data = pd.DataFrame({'current_user' : [user_name],'id': [1]})
-                data.to_excel('./media/excel/user.xlsx', index=False)
     
     return render(request, 'polygon.html', {'form':form})
 
@@ -491,10 +487,6 @@ def polygon2(request):
             return redirect(to = "map")
     else:
         form = Polygon2Form()
-        user_name = request.user.get_username()
-        if user_name:
-                data = pd.DataFrame({'current_user' : [user_name],'id': [1]})
-                data.to_excel('./media/excel/user.xlsx', index=False)
     
     return render(request, 'polygon2.html', {'form':form})
 
@@ -502,72 +494,72 @@ def polygon2(request):
 ## Configurar punto
 @login_required(login_url='/accounts/login/')
 def save_polygon(request):
+    file = pd.read_excel('./media/excel/data.xlsx')
+    file1 = pd.DataFrame(file)
+    current_user = request.user.get_username()
+    lotes_disponibles = []
+    for i in range(len(file1)):
+        if file1['name_user'][i] == current_user:
+            if file1['name_polygon'][i] not in lotes_disponibles:
+                lotes_disponibles.append(file1['name_polygon'][i])
+            else:
+                continue
+        else:
+            continue
     if request.method == 'POST':
-        form = SavePolygonForm(request.POST)
-        if form.is_valid():
-            reason = form.cleaned_data['options']
-            reason = dict(form.fields['options'].choices)[reason]
-            file = pd.read_excel('./media/excel/data.xlsx')
-            file1 = pd.DataFrame(file)
-            new_geom = []
-            current_user = request.user.get_username()
-            for i in range(len(file1)):
-                if file1['name_user'][i] == current_user:
-                    if file1['name_polygon'][i] == reason:
-                        new_geom.append(file1['polygon_coords'][i])
-                    else:
-                        continue
+        data = request.POST['files']
+        new_geom = []
+            
+        for i in range(len(file1)):
+            if file1['name_user'][i] == current_user:
+                if file1['name_polygon'][i] == data:
+                    new_geom.append(file1['polygon_coords'][i])
                 else:
                     continue
-            new_coordinates = []
-            for i in new_geom:
-                ff = i.split(',')
-                dd = ff[0].split('[')
-                gg = ff[1].split(']')
+            else:
+                continue
+        new_coordinates = []
+        for i in new_geom:
+            ff = i.split(',')
+            dd = ff[0].split('[')
+            gg = ff[1].split(']')
                 
-                dd1 = float(dd[1])
-                gg1 = float(gg[0])
-                new_coordinates.append([dd1,gg1])
+            dd1 = float(dd[1])
+            gg1 = float(gg[0])
+            new_coordinates.append([dd1,gg1])
 
-            if len(coordenadas) > 0:
-                coordenadas.clear()
+        if len(coordenadas) > 0:
+            coordenadas.clear()
+        print(new_coordinates)
+        coordenadas.append(new_coordinates) 
 
-            coordenadas.append(new_coordinates) 
+        return redirect(to = "map")
 
-            return redirect(to = "map")
-    else:
-        form = SavePolygonForm()
-        user_name = request.user.get_username()
-        if user_name:
-            data = pd.DataFrame({'current_user' : [user_name],'id': [1]})
-            data.to_excel('./media/excel/user.xlsx', index=False)
-
-    return render(request, 'SaveP.html', {'form':form})
+    return render(request, 'SaveP.html', {'lista': lotes_disponibles})
 
 ## Registro de usuario
 def register_user(request):
-    data = { 'form': CustomUser()}
     if request.method == 'POST':
         formulario = CustomUser(data = request.POST)
         if formulario.is_valid():
-            formulario.save()
-            user = authenticate(username = formulario.cleaned_data["username"], password = formulario.cleaned_data["password1"])
-            login(request, user)
-            messages.success(request, "El usuario a sido creado satisfactoriamente")
-
-            return redirect(to = "map")
-
-        data["form"] = formulario    
-    return render(request, 'registration/register.html', data)
+            if formulario.cleaned_data["password1"] == formulario.cleaned_data["password2"]:
+                formulario.save()
+                user = authenticate(username = formulario.cleaned_data["username"], password = formulario.cleaned_data["password1"])
+                login(request, user)
+                return redirect(to = "map")
+        else:   
+            passw = 'No'
+            formulario = CustomUser()
+            return render(request, 'registration/register.html', {'form':formulario, 'pass':passw})
+    else:
+        formulario = CustomUser()
+  
+    return render(request, 'registration/register.html', {'form':formulario})
 
 
 @login_required(login_url='/accounts/login/')
 def upload(request):
     user_name = request.user.get_username()
-    if user_name:
-        data = pd.DataFrame({'current_user' : [user_name],'id': [1]})
-        data.to_excel('./media/excel/user.xlsx', index=False)
-
     path = './media/'
     directory_cont = os.listdir(path)
 
@@ -603,36 +595,38 @@ def upload(request):
 
 @login_required(login_url='/accounts/login/')
 def Config_up(request):
+    parent_dir = './media/'
+    file3 = pd.read_excel('./media/excel/data.xlsx')
+    file3 = pd.DataFrame(file3)
+    user_name = request.user.get_username()
+    path = os.path.join(parent_dir, user_name)
+    directory_cont = os.listdir(path)
+    lista = []
+    for file in directory_cont:
+        f = file.split('.')
+        if f[1] == 'shp' or f[1] == 'kml':
+            lista.append(file)
+    
     if request.method == 'POST':
-        form = ConfiUpForm(request.POST)
-        if form.is_valid():
-            reason = form.cleaned_data['options']
-            reason = dict(form.fields['options'].choices)[reason]
-            parent_dir = './media/'
-            user_name = request.user.get_username()
-            path = os.path.join(parent_dir, user_name)
-            directory_cont = os.listdir(path)
-            new_file = []
-            for i in directory_cont:
-                if i == reason:
-                    new_file.append(i)
-            file = os.path.join(path, new_file[0])
-            shapefile = gpd.read_file(file)
+        data = request.POST['files']
+        file = os.path.join(path, data)
+        shapefile = gpd.read_file(file)
 
-            def coord_lister(geom):
-                coords = list(geom.exterior.coords)
-                return (coords)
-            tes_list = []
-            coordinates_list = shapefile.geometry.apply(coord_lister)
-            for j in coordinates_list:
-                tes_list.append(j)
+        def coord_lister(geom):
+            coords = list(geom.exterior.coords)
+            return (coords)
+        tes_list = []
+        coordinates_list = shapefile.geometry.apply(coord_lister)
+        for j in coordinates_list:
+            tes_list.append(j)
 
-            if len(coordenadas) > 0:
-                coordenadas.clear()
+        if len(coordenadas) > 0:
+            coordenadas.clear()
 
-            coordenadas.append(tes_list[0])
+        coordenadas.append(tes_list[0])
 
-            return redirect(to='map')
-    else:
-        form = ConfiUpForm()
-    return render(request, 'Config_up.html', {'form': form})
+        return redirect(to='map')
+    
+    length = len(lista)
+
+    return render(request, 'Config_up.html', {'lista':lista, 'largo':length})
