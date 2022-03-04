@@ -147,7 +147,7 @@ class map(TemplateView):
                 sum_y = np.sum(array[:, 1])
                 return sum_x/length, sum_y/length
             
-            array = np.array(new_coords[0])
+            array = np.array(new_coords)
             
             centroide = Centroid(array = array)
             
