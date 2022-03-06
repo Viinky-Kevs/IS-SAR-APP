@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500&display=swap');
+
+* {
+  font-family: 'Fredoka', sans-serif;
+}
+
+.container_a {
+    position: relative;
+    width: 30%;
+    height: 70vh;
+    margin: 0;
+}
+
+.container {
+    position: relative;
+    top: 0; bottom: 0; left: 0; right: 0;
+    margin: auto;
+    width: 470px; 
+    height: 400px;
+    background-color: burlywood;
+    text-align: center;
+    border-radius: 15px;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:link {
+    color: black;
+  }
+a:visited {
+    color: black;
+  }
+
+.button {
+    cursor: pointer;
+    width: 150px;
+}
+.formulario {
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+@media only screen and (max-width: 1300px){
+    .formulario {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}

@@ -1,7 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500&display=swap');
+
+* {
+  font-family: 'Fredoka', sans-serif;
+}
+
 .container_a {
     position:relative;
     width:90vw;
-    height: 90vh;
+    height: 95vh;
     margin: auto;
 }
 
@@ -10,14 +16,10 @@
     top: 0; bottom: 0; left: 0; right: 0;
     margin: auto;
     width: 470px; 
-    height: 500px;
+    height: 520px;
     background-color: burlywood;
     text-align: center;
     border-radius: 15px;
-}
-
-.formulario {
-    
 }
 
 a {

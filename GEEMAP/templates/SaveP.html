@@ -6,46 +6,82 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'style_polygon.css' %}">
+    <link rel="stylesheet" href="{% static 'style_save.css' %}">
     <link rel="icon" href="{% static 'colombia.png' %}">
     <title>Configurar punto</title>
 </head>
 <body>
-    <div class="container_a">
-        <div class="container">
-            <br>
-            <form action="" method="post" class="formulario">
-                {% csrf_token %}
-                <h2>
-                    Poligonos guardados de {{user.username}}
-                </h2>
+    <div class="container_p">
+        <form action="{% url 'save_polygon' %}" method="post" class="formulario">
+            {% csrf_token %}
+            <div class="container_a">
                 <br>
-                <h4>Selecciona un punto guardado: </h4>
+                <div class="container">
+                    <br>
+                    <br>
+                        <h2>
+                            Polígonos dibujados de {{user.username}}
+                        </h2>
+                        <br>
+                        <h3>Selecciona lote dibujado: </h3>
+                        <br>
+                        <select id="files" name="files">
+                            {% for i in lista %}
+                            <option value="{{i}}" name="choose">{{i}}</option>
+                            {% endfor %}
+                        </select>
+                        <br>
+                        <br>
+                        <input type="submit" value="Cargar" class="button">                   
+                </div>
+            </div>
+            <div class="container_a">
                 <br>
-                <select id="files" name="files">
-                    {% for i in lista %}
-                    <option value="{{i}}" name="choose">{{i}}</option>
-                    {% endfor %}
-                </select>
-                <br>
-                <br>
-                <input type="submit" value="configurar" class="button">
-                <br>
-                <br>
-                <a href="{% url 'polygon' %}">Dibujar poligono</a>
-                <br>
-                <br>
-                <h4>¿Tienes un archivo cargado? <a href="{% url 'configurate' %}">Seleccionalo</a></h4>
-                <br>
-                <br>
-                <a href="{% url 'map' %}">Volver al mapa</a>
-            </form>
-            <br>
-            <br>
-            <br>
-            <br>
-            <h4>IS-SAR</h4>
-        </div>
+                <div class="container">
+                    <br>
+                    <br>
+                        <h2>
+                            Polígonos cargados de {{ user.username }} 
+                        </h2>
+                        <br>
+                        <h3>Selecciona archivo cargado</h3>
+                        <br>
+                        <select id="files" name="files_up">
+                            {% for i in lista_up %}
+                            <option value="{{i}}" name="choose">{{i}}</option>
+                            {% endfor %}
+                        </select>
+                        <br>
+                        <br>
+                        <input type="submit" value="Cargar" class="button">   
+                </div>
+            </div>
+        </form> 
     </div>
+    <div style="display: flex; align-items: center; justify-content: center;">
+        <a href="{% url 'polygon' %}">Dibujar poligono</a>
+    </div>
+    <br>
+    <div style="display: flex; align-items: center; justify-content: center;">
+        <a href="{% url 'upload' %}">Cargar archivos</a>
+    </div>
+    <br>
+    <div style="display: flex; align-items: center; justify-content: center;">
+        <a href="{% url 'map' %}">Volver al mapa</a>
+    </div>
+    <br>
+    <div style="display: flex; align-items: center; justify-content: center;">
+        <strong>IS-SAR</strong>
+    </div>
+    {% if message %}
+    <script>
+        alert('Por favor selecciona solo un polígono')
+    </script>
+    {% endif %}
+    {% if message1 %}
+    <script>
+        alert('Por favor selecciona un polígono')
+    </script>
+    {% endif %}
 </body>
 </html>

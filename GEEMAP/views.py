@@ -37,6 +37,12 @@ class map(TemplateView):
             os.remove('./media/excel/polygon.xlsx')
         else:
             Draw_in_map = False
+        
+        if os.path.exists('./media/excel/name_p.xlsx'):
+            
+            file = pd.read_excel('./media/excel/name_p.xlsx')
+            name_polygon = file['name_polygon'][0]
+            os.remove('./media/excel/name_p.xlsx')
 
         ## Fecha más reciente
         
@@ -64,7 +70,7 @@ class map(TemplateView):
         Map.add_basemap('HYBRID')
         
         if Draw_in_map == True:
-            
+            name_p = name_polygon 
             geometry_user = ee.Geometry.Polygon(new_coords)
             
             parameter = {'START_DATE': before_list1[0],
@@ -305,7 +311,8 @@ class map(TemplateView):
             return {"map": figure,
                     "actual_date" : format_date,
                     "color_alert" : color_alert,
-                    "lamina" : round(lam, 2)}
+                    "lamina" : round(lam, 2),
+                    'name': name_p}
             
         else:
             ## Fecha más reciente
@@ -440,6 +447,9 @@ def polygon(request):
                      'name_polygon': name_polygon,
                      'polygon_coords': new_coords_p})
 
+            data = pd.DataFrame({'id': [1], 'name_polygon': [name_polygon]})
+            data.to_excel('./media/excel/name_p.xlsx', index=False)
+
             final_file = file1.append(dataF)
             final_file.to_excel('./media/excel/data.xlsx', index=False)
 
@@ -507,7 +517,7 @@ def save_polygon(request):
     file = pd.read_excel('./media/excel/data.xlsx')
     file1 = pd.DataFrame(file)
     current_user = request.user.get_username()
-    lotes_disponibles = []
+    lotes_disponibles = ['Selecciona']
     for i in range(len(file1)):
         if file1['name_user'][i] == current_user:
             if file1['name_polygon'][i] not in lotes_disponibles:
@@ -516,43 +526,95 @@ def save_polygon(request):
                 continue
         else:
             continue
+    parent_dir = './media/'
+    file3 = pd.read_excel('./media/excel/data.xlsx')
+    file3 = pd.DataFrame(file3)
+    user_name = request.user.get_username()
+    path = os.path.join(parent_dir, user_name)
+    directory_cont = os.listdir(path)
+    lista_up = ['Selecciona']
+    for file in directory_cont:
+        f = file.split('.')
+        if f[1] == 'shp' or f[1] == 'kml':
+            lista_up.append(file)
+
     if request.method == 'POST':
         data = request.POST['files']
-        new_geom = []
-            
-        for i in range(len(file1)):
-            if file1['name_user'][i] == current_user:
-                if file1['name_polygon'][i] == data:
-                    new_geom.append(file1['polygon_coords'][i])
+        data1 = request.POST['files_up']
+
+        if data == 'Selecciona' and data1 == 'Selecciona':
+            message1 = 'Yes'
+            return render(request, 'SaveP.html', {'lista': lotes_disponibles, 'lista_up':lista_up, 'message1': message1})
+        elif data != 'Selecciona' and data1 != 'Selecciona':
+            message = 'Yes'
+            return render(request, 'SaveP.html', {'lista': lotes_disponibles, 'lista_up':lista_up, 'message': message})
+
+        if data != 'Selecciona' and data1 == 'Selecciona':
+            data_1 = pd.DataFrame({'id': [1], 'name_polygon': [data]})
+            data_1.to_excel('./media/excel/name_p.xlsx', index=False)
+            new_geom = [] 
+            for i in range(len(file1)):
+                if file1['name_user'][i] == current_user:
+                    if file1['name_polygon'][i] == data:
+                        new_geom.append(file1['polygon_coords'][i])
+                    else:
+                        continue
                 else:
                     continue
-            else:
-                continue
-        new_coordinates = []
-        for i in new_geom:
-            ff = i.split(',')
-            dd = ff[0].split('[')
-            gg = ff[1].split(']')
-                
-            dd1 = float(dd[1])
-            gg1 = float(gg[0])
-            new_coordinates.append([dd1,gg1])
+            new_coordinates = []
+            for i in new_geom:
+                ff = i.split(',')
+                dd = ff[0].split('[')
+                gg = ff[1].split(']')
+                    
+                dd1 = float(dd[1])
+                gg1 = float(gg[0])
+                new_coordinates.append([dd1,gg1])
 
-        longitude = []
-        latitude = []
+            longitude = []
+            latitude = []
 
-        for i in range(len(new_coordinates)):
-            long, lat  = new_coordinates[i][0], new_coordinates[i][1]
-            longitude.append(long)
-            latitude.append(lat)
+            for i in range(len(new_coordinates)):
+                long, lat  = new_coordinates[i][0], new_coordinates[i][1]
+                longitude.append(long)
+                latitude.append(lat)
 
-        data_frame = pd.DataFrame({'Longitude': longitude, 'Latitude': latitude})
+            data_frame = pd.DataFrame({'Longitude': longitude, 'Latitude': latitude})
 
-        data_frame.to_excel('./media/excel/polygon.xlsx', index=False) 
+            data_frame.to_excel('./media/excel/polygon.xlsx', index=False) 
 
-        return redirect(to = "map")
+            return redirect(to = "map")
+        
+        elif data == 'Selecciona' and data1 != 'Selecciona':
+            data_1 = pd.DataFrame({'id': [1], 'name_polygon': [data1]})
+            data_1.to_excel('./media/excel/name_p.xlsx', index=False)
+            file = os.path.join(path, data1)
+            shapefile = gpd.read_file(file)
 
-    return render(request, 'SaveP.html', {'lista': lotes_disponibles})
+            def coord_lister(geom):
+                coords = list(geom.exterior.coords)
+                return (coords)
+            tes_list = []
+            coordinates_list = shapefile.geometry.apply(coord_lister)
+            for j in coordinates_list:
+                tes_list.append(j)
+
+            new_coordinates = tes_list[0]
+            longitude = []
+            latitude = []
+
+            for i in range(len(new_coordinates)):
+                long, lat  = new_coordinates[i][0], new_coordinates[i][1]
+                longitude.append(long)
+                latitude.append(lat)
+
+            data_frame = pd.DataFrame({'Longitude': longitude, 'Latitude': latitude})
+
+            data_frame.to_excel('./media/excel/polygon.xlsx', index=False) 
+
+            return redirect(to='map')
+
+    return render(request, 'SaveP.html', {'lista': lotes_disponibles, 'lista_up':lista_up})
 
 ## Registro de usuario
 def register_user(request):
@@ -604,56 +666,8 @@ def upload(request):
             fs.save(upload_file.name, upload_file)
 
         context['confirm'] = 'Yes'
-        return redirect(to = 'configurate')
+        return redirect(to = 'save_polygon')
         
     context['files'] = os.listdir(path_name)
     
     return render(request, 'upload.html', context)
-
-@login_required(login_url='/accounts/login/')
-def Config_up(request):
-    parent_dir = './media/'
-    file3 = pd.read_excel('./media/excel/data.xlsx')
-    file3 = pd.DataFrame(file3)
-    user_name = request.user.get_username()
-    path = os.path.join(parent_dir, user_name)
-    directory_cont = os.listdir(path)
-    lista = []
-    for file in directory_cont:
-        f = file.split('.')
-        if f[1] == 'shp' or f[1] == 'kml':
-            lista.append(file)
-    
-    if request.method == 'POST':
-        data = request.POST['files']
-        print(data, 'hola')
-        file = os.path.join(path, data)
-        shapefile = gpd.read_file(file)
-
-        def coord_lister(geom):
-            coords = list(geom.exterior.coords)
-            return (coords)
-        tes_list = []
-        coordinates_list = shapefile.geometry.apply(coord_lister)
-        for j in coordinates_list:
-            tes_list.append(j)
-
-        new_coordinates = tes_list[0]
-        longitude = []
-        latitude = []
-
-        for i in range(len(new_coordinates)):
-            long, lat  = new_coordinates[i][0], new_coordinates[i][1]
-            longitude.append(long)
-            latitude.append(lat)
-
-        data_frame = pd.DataFrame({'Longitude': longitude, 'Latitude': latitude})
-
-        data_frame.to_excel('./media/excel/polygon.xlsx', index=False) 
-
-
-        return redirect(to='map')
-    
-    length = len(lista)
-
-    return render(request, 'Config_up.html', {'lista':lista, 'largo':length})

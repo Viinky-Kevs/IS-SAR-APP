@@ -1,10 +1,16 @@
 @charset "UTF-8";
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500&display=swap');
+
+* {
+  font-family: 'Fredoka', sans-serif;
+}
+
 body {
   /*background-image: linear-gradient(135deg, #fab2ff 10%, #1904e5 100%);+*/
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  font-family: "Open Sans", sans-serif;
   color: #333333;
 }
 
@@ -167,4 +173,8 @@ label input[type=checkbox] {
 .color {
   width: 200px;
   border-radius: 50%;
+}
+
+.button:hover {
+  cursor: pointer;
 }
