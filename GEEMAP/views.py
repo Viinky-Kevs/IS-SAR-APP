@@ -430,6 +430,20 @@ class map(TemplateView):
 ## Definir poligono
 @login_required(login_url='/accounts/login/')
 def polygon(request):
+    user_name = request.user.get_username()
+    path = './media/'
+    directory_cont = os.listdir(path)
+
+    name_folders = []
+    for i in directory_cont:
+        name_folders.append(i)
+
+    if user_name not in name_folders:
+        new_dir = user_name
+        parent_dir = './media/'
+        path = os.path.join(parent_dir, new_dir)
+        os.mkdir(path)
+        
     if request.method == 'POST':
         form = PolygonForm(request.POST)
         if form.is_valid():
@@ -473,6 +487,19 @@ def polygon(request):
 
 @login_required(login_url='/accounts/login/')
 def polygon2(request):
+    user_name = request.user.get_username()
+    path = './media/'
+    directory_cont = os.listdir(path)
+
+    name_folders = []
+    for i in directory_cont:
+        name_folders.append(i)
+
+    if user_name not in name_folders:
+        new_dir = user_name
+        parent_dir = './media/'
+        path = os.path.join(parent_dir, new_dir)
+        os.mkdir(path)
     if request.method == 'POST':
         form = Polygon2Form(request.POST)
         if form.is_valid():
@@ -514,6 +541,20 @@ def polygon2(request):
 ## Configurar punto
 @login_required(login_url='/accounts/login/')
 def save_polygon(request):
+    user_name = request.user.get_username()
+    path = './media/'
+    directory_cont = os.listdir(path)
+
+    name_folders = []
+    for i in directory_cont:
+        name_folders.append(i)
+
+    if user_name not in name_folders:
+        new_dir = user_name
+        parent_dir = './media/'
+        path = os.path.join(parent_dir, new_dir)
+        os.mkdir(path)
+
     file = pd.read_excel('./media/excel/data.xlsx')
     file1 = pd.DataFrame(file)
     current_user = request.user.get_username()
