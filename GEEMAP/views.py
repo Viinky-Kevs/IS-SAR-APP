@@ -443,43 +443,61 @@ def polygon(request):
         parent_dir = './media/'
         path = os.path.join(parent_dir, new_dir)
         os.mkdir(path)
-        
+
+    file = pd.read_excel('./media/excel/data.xlsx')
+    file1 = pd.DataFrame(file)
+    current_user = request.user.get_username()
+    lotes_disponibles = ['Selecciona']
+    for i in range(len(file1)):
+        if file1['name_user'][i] == current_user:
+            if file1['name_polygon'][i] not in lotes_disponibles:
+                lotes_disponibles.append(file1['name_polygon'][i])
+            else:
+                continue
+        else:
+            continue   
+
     if request.method == 'POST':
         form = PolygonForm(request.POST)
         if form.is_valid():
             enter_polygon = form.cleaned_data['enter_polygon']
             name_polygon = form.cleaned_data['name_p']
-            user_name = request.user.get_username()
 
-            stud_obj = json.loads(enter_polygon)
-            new_coords_p = stud_obj['geometry']['coordinates'][0]
+            if name_polygon in lotes_disponibles:
+                message = 'Yes'
+                return render(request, 'polygon.html', {'form':form, 'message': message})
+            else:
+                user_name = request.user.get_username()
 
-            file = pd.read_excel('./media/excel/data.xlsx')
-            file1 = pd.DataFrame(file)
+                stud_obj = json.loads(enter_polygon)
+                new_coords_p = stud_obj['geometry']['coordinates'][0]
 
-            dataF = pd.DataFrame({'name_user': user_name,
-                     'name_polygon': name_polygon,
-                     'polygon_coords': new_coords_p})
+                file = pd.read_excel('./media/excel/data.xlsx')
+                file1 = pd.DataFrame(file)
 
-            data = pd.DataFrame({'id': [1], 'name_polygon': [name_polygon]})
-            data.to_excel('./media/excel/name_p.xlsx', index=False)
+                dataF = pd.DataFrame({'name_user': user_name,
+                        'name_polygon': name_polygon,
+                        'polygon_coords': new_coords_p})
 
-            final_file = file1.append(dataF)
-            final_file.to_excel('./media/excel/data.xlsx', index=False)
+                data = pd.DataFrame({'id': [1], 'name_polygon': [name_polygon]})
+                data.to_excel('./media/excel/name_p.xlsx', index=False)
 
-            longitude = []
-            latitude = []
+                final_file = file1.append(dataF)
+                final_file.to_excel('./media/excel/data.xlsx', index=False)
 
-            for i in range(len(new_coords_p)):
-                long, lat  = new_coords_p[i][0], new_coords_p[i][1]
-                longitude.append(long)
-                latitude.append(lat)
+                longitude = []
+                latitude = []
 
-            data_frame = pd.DataFrame({'Longitude': longitude, 'Latitude': latitude})
+                for i in range(len(new_coords_p)):
+                    long, lat  = new_coords_p[i][0], new_coords_p[i][1]
+                    longitude.append(long)
+                    latitude.append(lat)
 
-            data_frame.to_excel('./media/excel/polygon.xlsx', index=False)
-            
-            return redirect(to = "map")
+                data_frame = pd.DataFrame({'Longitude': longitude, 'Latitude': latitude})
+
+                data_frame.to_excel('./media/excel/polygon.xlsx', index=False)
+                
+                return redirect(to = "map")
     else:
         form = PolygonForm()
     
