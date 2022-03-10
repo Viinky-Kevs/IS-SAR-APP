@@ -10,7 +10,6 @@ class CustomUser(UserCreationForm):
 		widgets = {'field' : forms.TextInput(attrs={'class':'myfield'})}
 
 class PolygonForm(forms.Form):
-	enter_polygon = forms.CharField(widget=forms.Textarea)
 	name_p = forms.CharField(max_length=50)
 
 class Polygon2Form(forms.Form):

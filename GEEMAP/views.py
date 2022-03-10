@@ -1,9 +1,7 @@
 from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.views.generic import TemplateView
 from django.contrib.auth import authenticate, login
-from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.decorators import login_required
+from django.core.files.storage import FileSystemStorage
 
 from .forms import CustomUser, PolygonForm, Polygon2Form
 
@@ -12,68 +10,80 @@ import folium
 import os
 import math
 import json
+import datetime
 import geemap.foliumap as geemap
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-import datetime
 
 from .helper import add_ratio_lin, lin_to_db2, lin_to_db
 from .wrapper import s1_preproc
 
-class map(TemplateView): 
+def Map(request):
     ee.Initialize()
-    template_name = 'map.html'
-    
-    def get_context_data(request):
 
-        if os.path.exists('./media/excel/polygon.xlsx'):
-            Draw_in_map = True
-            file = pd.read_excel('./media/excel/polygon.xlsx')
-            new_coords = []
-            for i in range(len(file)):
-                long, lat = file['Longitude'][i], file['Latitude'][i]
-                new_coords.append((long, lat))
-            os.remove('./media/excel/polygon.xlsx')
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        data = request.GET
+        data1 = dict(data)
+        stud_obj = json.loads(data1['data'][0])
+        new_coords_p = stud_obj['geometry']['coordinates'][0]
+        longitude = []
+        latitude = []
+        for i in range(len(new_coords_p)):
+            long, lat  = new_coords_p[i][0], new_coords_p[i][1]
+            longitude.append(long)
+            latitude.append(lat)
+        if os.path.exists('./media/excel/polygon_draw.xlsx'):
+            os.remove('./media/excel/polygon_draw.xlsx')
+            data_frame = pd.DataFrame({'Longitude': longitude, 'Latitude': latitude})
+            data_frame.to_excel('./media/excel/polygon_draw.xlsx', index=False)
         else:
-            Draw_in_map = False
+            data_frame = pd.DataFrame({'Longitude': longitude, 'Latitude': latitude})
+            data_frame.to_excel('./media/excel/polygon_draw.xlsx', index=False)
+
+    if os.path.exists('./media/excel/polygon.xlsx'):
+        Draw_in_map = True
+        file = pd.read_excel('./media/excel/polygon.xlsx')
+        new_coords = []
+        for i in range(len(file)):
+            long, lat = file['Longitude'][i], file['Latitude'][i]
+            new_coords.append((long, lat))
+        os.remove('./media/excel/polygon.xlsx')
+             
+    else:
+        Draw_in_map = False
         
-        if os.path.exists('./media/excel/name_p.xlsx'):
-            
-            file = pd.read_excel('./media/excel/name_p.xlsx')
-            name_polygon = file['name_polygon'][0]
-            os.remove('./media/excel/name_p.xlsx')
+    if os.path.exists('./media/excel/name_p.xlsx'):    
+        file = pd.read_excel('./media/excel/name_p.xlsx')
+        name_polygon = file['name_polygon'][0]
+        os.remove('./media/excel/name_p.xlsx')
 
-        ## Fecha más reciente
+    today = datetime.datetime.now()
+    days_back = datetime.timedelta(days = 14)
+    before = today - days_back
+
+    today_list = str(today)
+    today_list1 = today_list.split(' ')
+
+    before_list = str(before)
+    before_list1 = before_list.split(' ')
+
+    figure = folium.Figure()
         
-        today = datetime.datetime.now()
-        days_back = datetime.timedelta(days = 14)
-        before = today - days_back
-
-        today_list = str(today)
-        today_list1 = today_list.split(' ')
-
-        before_list = str(before)
-        before_list1 = before_list.split(' ')
-
-        ## Interactive map
-
-        figure = folium.Figure()
-        
-        Map = geemap.Map(plugin_Draw = True, 
+    Map = geemap.Map(plugin_Draw = True, 
                          Draw_export = False,
                          plugin_LayerControl = False,
                          location = [4.3, -76.1],
                          zoom_start = 10,
                          plugin_LatLngPopup = False)
                          
-        Map.add_basemap('HYBRID')
+    Map.add_basemap('HYBRID')
         
-        if Draw_in_map == True:
-            name_p = name_polygon 
-            geometry_user = ee.Geometry.Polygon(new_coords)
+    if Draw_in_map == True:
+        name_p = name_polygon            
+        geometry_user = ee.Geometry.Polygon([new_coords])
             
-            parameter = {'START_DATE': before_list1[0],
+        parameter = {'START_DATE': before_list1[0],
                     'STOP_DATE' : today_list1[0],
                     'POLARIZATION' : 'VVVH',
                     'ORBIT' : 'BOTH',
@@ -98,66 +108,60 @@ class map(TemplateView):
                     'FORMAT' : 'DB',
                     'CLIP_TO_ROI' : False}
 
-            s1_preprocces = s1_preproc(parameter)
+        s1_preprocces = s1_preproc(parameter)
             
             #Function to get yyy.mmss (float)
-            def msToFrac(ms):
-                year = ee.Date(ms).get('year')
-                frac = ee.Date(ms).getFraction('year')
-                return year.add(frac)
+        def msToFrac(ms):
+            year = ee.Date(ms).get('year')
+            frac = ee.Date(ms).getFraction('year')
+            return year.add(frac)
 
-            #This add DATE IN FULL FORMAT. date 1 is not gonna be added.
-            def xx(i):
-                return i.set('date1', ee.Date(i.get('system:time_start'))).set('date2', msToFrac(i.get('system:time_start')))
+        def xx(i):
+            return i.set('date1', ee.Date(i.get('system:time_start'))).set('date2', msToFrac(i.get('system:time_start')))
 
-            #s1_preprocces = s1_preprocces.map(lambda i: xx(i))
+        s1_preprocces = s1_preprocces.map(xx)
 
-            s1_preprocces = s1_preprocces.map(xx)
-            #print(s1_preprocces)
+        def addTime(i):
+            return i.addBands(i.metadata('date2'))
 
-            #This function adds a band representing the image timestamp.
-            def addTime(i):
-                return i.addBands(i.metadata('date2'))
+        s1_preprocces_final = s1_preprocces.map(addTime)
 
-            s1_preprocces_final = s1_preprocces.map(addTime)
+        visparam = {}
 
-            ##----------------------------##
-            visparam = {}
-
-            if parameter['POLARIZATION'] == 'VVVH':
-                if parameter['FORMAT'] == 'DB':
-                    s1_preprocces_view = s1_preprocces.map(add_ratio_lin).map(lin_to_db2)
-                    visparam['bands'] = ['VV', 'VH', 'VVVH_ratio']
-                    visparam['min'] = [-20, -25, 1]
-                    visparam['max'] = [0, -5, 15]
-                else:
-                    s1_preprocces_view = s1_preprocces.map(add_ratio_lin)
-                    visparam['bands'] = ['VV', 'VH', 'VVVH_ratio']
-                    visparam['min'] = [0.01, 0.0032, 1.25]
-                    visparam['max'] = [1, 0.31, 31.62]
+        if parameter['POLARIZATION'] == 'VVVH':
+            if parameter['FORMAT'] == 'DB':
+                s1_preprocces_view = s1_preprocces.map(add_ratio_lin).map(lin_to_db2)
+                visparam['bands'] = ['VV', 'VH', 'VVVH_ratio']
+                visparam['min'] = [-20, -25, 1]
+                visparam['max'] = [0, -5, 15]
             else:
-                if parameter['FORMAT'] == 'DB':
-                    s1_preprocces_view = s1_preprocces.map(lin_to_db)
-                    visparam['bands'] = parameter['POLARIZATION']
-                    visparam['min'] = -25
-                    visparam['max'] = 0
-                else:
-                    s1_preprocces_view = s1_preprocces
-                    visparam['bands'] = parameter['POLARIZATION']
-                    visparam['min'] = 0
-                    visparam['max'] = 0.2
+                s1_preprocces_view = s1_preprocces.map(add_ratio_lin)
+                visparam['bands'] = ['VV', 'VH', 'VVVH_ratio']
+                visparam['min'] = [0.01, 0.0032, 1.25]
+                visparam['max'] = [1, 0.31, 31.62]
+        else:
+            if parameter['FORMAT'] == 'DB':
+                s1_preprocces_view = s1_preprocces.map(lin_to_db)
+                visparam['bands'] = parameter['POLARIZATION']
+                visparam['min'] = -25
+                visparam['max'] = 0
+            else:
+                s1_preprocces_view = s1_preprocces
+                visparam['bands'] = parameter['POLARIZATION']
+                visparam['min'] = 0
+                visparam['max'] = 0.2
                     
-            def Centroid(array):
-                length = array.shape[0]
-                sum_x = np.sum(array[:, 0])
-                sum_y = np.sum(array[:, 1])
-                return sum_x/length, sum_y/length
+        def Centroid(array):
+            length = array.shape[0]
+            sum_x = np.sum(array[:, 0])
+            sum_y = np.sum(array[:, 1])
+            return sum_x/length, sum_y/length
             
-            array = np.array(new_coords)
+        array = np.array(new_coords)
             
-            centroide = Centroid(array = array)
+        centroide = Centroid(array = array)
             
-            geojson_test = {
+        geojson_test = {
             "type": "FeatureCollection",
             "columns": {
                 "Place": "String",
@@ -184,157 +188,123 @@ class map(TemplateView):
             ]
             }
 
-            geojsonFc = ee.FeatureCollection(geojson_test)
+        geojsonFc = ee.FeatureCollection(geojson_test)
             
-            def images(img):
-                return img.sampleRegions(collection = geojsonFc, scale = 10, geometries = True)
+        def images(img):
+            return img.sampleRegions(collection = geojsonFc, scale = 10, geometries = True)
 
-            table = ee.FeatureCollection(s1_preprocces_final.map(images)).flatten()
+        table = ee.FeatureCollection(s1_preprocces_final.map(images)).flatten()
 
-            table_info = table.getInfo()
+        table_info = table.getInfo()
 
-            VH = table_info['features'][0]['properties']['VH']
-            angle = table_info['features'][0]['properties']['angle']
+        VH = table_info['features'][0]['properties']['VH']
+        angle = table_info['features'][0]['properties']['angle']
             
-            def sm_wcm(sigma0, theta):
-                A = 85.71200708
-                B = -32.46500098
-                C = 0.90101068
-                D = 4.39382781
-                V = -0.06860272
+        def sm_wcm(sigma0, theta):
+            A = 85.71200708
+            B = -32.46500098
+            C = 0.90101068
+            D = 4.39382781
+            V = -0.06860272
 
-                #Equation (2) in Bousbih's 2018 study
-                thao2 = math.exp(-2 * B * (V / math.cos(theta * (math.pi / 180))))
+            thao2 = math.exp(-2 * B * (V / math.cos(theta * (math.pi / 180))))
 
-                #Equation (4) in Bousbih's 2018 study
-                sigma_0_veg = A * V * math.cos(theta * math.pi / 180) * (1 - thao2)
-                sigma_0_veg = 0 if sigma_0_veg < 0 else sigma_0_veg
+            sigma_0_veg = A * V * math.cos(theta * math.pi / 180) * (1 - thao2)
+            sigma_0_veg = 0 if sigma_0_veg < 0 else sigma_0_veg
 
-                #sigma_0_veg_soil was set as zero
-                sigma_0_veg_soil = 0
+            sigma_0_veg_soil = 0
 
-                #Inverted form of Equation (4) in Bousbih's 2018 study, in which the equation 
-                # is solved for mv (volumetric soil moisture) 
+            mv = 1 / D * math.log10((sigma0 - sigma_0_veg - sigma_0_veg_soil) / (C * thao2))
 
-                mv = 1 / D * math.log10((sigma0 - sigma_0_veg - sigma_0_veg_soil) / (C * thao2))
-
-                return mv
+            return mv
             
-            model_5 = sm_wcm(sigma0 = VH, theta = angle)
+        model_5 = sm_wcm(sigma0 = VH, theta = angle)
             
-            def theta_0_5_to_0_60(theta_0_5, lat, long):
-                #Computing theta_0_60
-                theta_0_60 = 0.22318 * theta_0_5 - 1.18155 * lat  +2.27015 * long + 178.43681
-                return theta_0_60
+        def theta_0_5_to_0_60(theta_0_5, lat, long):
+            theta_0_60 = 0.22318 * theta_0_5 - 1.18155 * lat  +2.27015 * long + 178.43681
+            return theta_0_60
             
-            model_60 = theta_0_5_to_0_60(theta_0_5 = model_5, lat = centroide[1], long = centroide[0])
+        model_60 = theta_0_5_to_0_60(theta_0_5 = model_5, lat = centroide[1], long = centroide[0])
             
-            print(f'Modelo a 60cm: {model_60}')
-            
-            shapefile = gpd.read_file('./media/shapefiles_admin/FC_PWP_v2_map_geo.shp')
+        shapefile = gpd.read_file('./media/shapefiles_admin/FC_PWP_v2_map_geo.shp')
 
-            def coord_lister(geom):
-                coords = list(geom.exterior.coords)
-                return (coords)
+        def coord_lister(geom):
+            coords = list(geom.exterior.coords)
+            return (coords)
 
-            coordinates_list = shapefile.geometry.apply(coord_lister)
+        coordinates_list = shapefile.geometry.apply(coord_lister)
 
-            difference = []
+        difference = []
 
-            for i in range(len(coordinates_list)):
-                centroides = Centroid(np.array(coordinates_list[i]))
-                longitude, latitude = centroides[0], centroides[1]
-                cenLat, cenLong = centroide[1], centroide[0]
+        for i in range(len(coordinates_list)):
+            centroides = Centroid(np.array(coordinates_list[i]))
+            longitude, latitude = centroides[0], centroides[1]
+            cenLat, cenLong = centroide[1], centroide[0]
                 
-                result = (((abs(longitude)-abs(cenLong))**2+((abs(latitude)-abs(cenLat))**2))**0.5)
-                difference.append(result)
+            result = (((abs(longitude)-abs(cenLong))**2+((abs(latitude)-abs(cenLat))**2))**0.5)
+            difference.append(result)
             
-            counter = -1
-            for i in difference:
-                counter += 1
-                if i == min(difference):
-                    break
+        counter = -1
+        for i in difference:
+            counter += 1
+            if i == min(difference):
+                break    
+            
+        depletion_factor = 0.5
+            
+        theta_FC = shapefile["CC"][counter] / 100
+            
+        theta_PWP = shapefile["PMP"][counter] /100
+            
+        if model_60 <= theta_FC:
+            taw = theta_FC - theta_PWP
+            raw = taw * depletion_factor * 600
                 
-            
-            depletion_factor = 0.5
-            
-            theta_FC = shapefile["CC"][counter] / 100
-            
-            theta_PWP = shapefile["PMP"][counter] /100
-
-            print(f'Capacidad de campo: {theta_FC}')
-            print(f'Punto de marchitez permanente: {theta_PWP}')
-            
-            if model_60 <= theta_FC:
+            lam = 600 * (theta_FC - model_60)
                 
-                #Total and readly avaible water
-                taw = theta_FC - theta_PWP
-                raw = taw * depletion_factor * 600
-                print("taw", taw)
-                print("raw", raw)
-                
-                lam = 600 * (theta_FC - model_60)
-                
-                if lam >= raw:
-                    #Red color
-                    color_alert = 'Red'
-                else:
-                    #Yellow color
-                    color_alert = 'Yellow'        
+            if lam >= raw:
+                color_alert = 'Red'
             else:
-                # Green color
-                lam = 0
-                color_alert = 'Green'
-            
-            #Map.addLayer(s1_preprocces_view.first(), visparam, 'Processed_image', True, 0.5)
-
-            sentinel1 = ee.Image(ee.ImageCollection('COPERNICUS/S1_GRD') 
+                color_alert = 'Yellow'        
+        else:
+            lam = 0
+            color_alert = 'Green'
+        
+        sentinel1 = ee.Image(ee.ImageCollection('COPERNICUS/S1_GRD') 
                        .filterBounds(geometry_user) 
                        .filterDate(ee.Date('2022-02-11'), ee.Date('2022-02-23')) 
                        .first() 
                        .clip(geometry_user))
-            
-            Map.addLayer(sentinel1, {'min': [-20, -25, 1], 'max': [0, -5, 15]}, 'Plygon image', True)
+        
+        Map.addLayer(sentinel1, {'min': [-20, -25, 1], 'max': [0, -5, 15]}, 'Plygon image', True)
 
-            Map.addLayer(geometry_user, {'color': 'FF0000'}, 'geodesic polygon', True, 0.2)
+        Map.addLayer(geometry_user, {'color': 'FF0000'}, 'geodesic polygon', True, 0.2)
 
-            Map.setCenter(centroide[0],centroide[1], zoom = 16)
+        Map.setCenter(centroide[0],centroide[1], zoom = 16)
 
-            Map.add_to(figure)
+        Map.add_to(figure)
+    
+        figure.render()
 
-            figure.render()
+        format_date = today_list1[0]
 
-            format_date = "2022-02-23"#date_r
+        message = 'Yes'
 
-            print(color_alert)
-
-            return {"map": figure,
+        return render(request, 'map.html',{"map": figure,
                     "actual_date" : format_date,
                     "color_alert" : color_alert,
                     "lamina" : round(lam, 2),
-                    'name': name_p}
+                    'name': name_p,
+                    "message": message})
             
-        else:
-            ## Fecha más reciente
-        
-            today = datetime.datetime.now()
-            days_back = datetime.timedelta(days = 14)
-            before = today - days_back
-
-            today_list = str(today)
-            today_list1 = today_list.split(' ')
-
-            before_list = str(before)
-            before_list1 = before_list.split(' ')
-
-
-            geometry = ee.Geometry.Polygon(
+    else:
+        geometry = ee.Geometry.Polygon(
                 [[[-76.25925273198507, 4.4784853333279475],
                 [-76.86899394292257, 3.5195334529660314],
                 [-76.59433573979757, 3.2947119593342977],
                 [-75.99008769292257, 4.3579948778381965]]])
             
-            parameter = {'START_DATE': before_list1[0],
+        parameter = {'START_DATE': before_list1[0],
                     'STOP_DATE' : today_list1[0],
                     'POLARIZATION' : 'VVVH',
                     'ORBIT' : 'BOTH',
@@ -359,91 +329,96 @@ class map(TemplateView):
                     'FORMAT' : 'DB',
                     'CLIP_TO_ROI' : False}
 
-            s1_preprocces = s1_preproc(parameter)
+        s1_preprocces = s1_preproc(parameter)
 
-            #Function to get yyy.mmss (float)
-            def msToFrac(ms):
-                year = ee.Date(ms).get('year')
-                frac = ee.Date(ms).getFraction('year')
-                return year.add(frac)
+        def msToFrac(ms):
+            year = ee.Date(ms).get('year')
+            frac = ee.Date(ms).getFraction('year')
+            return year.add(frac)
 
-            #This add DATE IN FULL FORMAT. date 1 is not gonna be added.
-            def xx(i):
-                return i.set('date1', ee.Date(i.get('system:time_start'))).set('date2', msToFrac(i.get('system:time_start')))
+        def xx(i):
+            return i.set('date1', ee.Date(i.get('system:time_start'))).set('date2', msToFrac(i.get('system:time_start')))
 
-            #s1_preprocces = s1_preprocces.map(lambda i: xx(i))
+        s1_preprocces = s1_preprocces.map(xx)
 
-            s1_preprocces = s1_preprocces.map(xx)
-            #print(s1_preprocces)
+        def addTime(i):
+            return i.addBands(i.metadata('date2'))
 
-            #This function adds a band representing the image timestamp.
-            def addTime(i):
-                return i.addBands(i.metadata('date2'))
+        s1_preprocces_final = s1_preprocces.map(addTime)
 
-            s1_preprocces_final = s1_preprocces.map(addTime)
+        visparam = {}
 
-            ##----------------------------##
-            visparam = {}
-
-            if parameter['POLARIZATION'] == 'VVVH':
-                if parameter['FORMAT'] == 'DB':
-                    s1_preprocces_view = s1_preprocces.map(add_ratio_lin).map(lin_to_db2)
-                    visparam['bands'] = ['VV', 'VH', 'VVVH_ratio']
-                    visparam['min'] = [-20, -25, 1]
-                    visparam['max'] = [0, -5, 15]
-                else:
-                    s1_preprocces_view = s1_preprocces.map(add_ratio_lin)
-                    visparam['bands'] = ['VV', 'VH', 'VVVH_ratio']
-                    visparam['min'] = [0.01, 0.0032, 1.25]
-                    visparam['max'] = [1, 0.31, 31.62]
+        if parameter['POLARIZATION'] == 'VVVH':
+            if parameter['FORMAT'] == 'DB':
+                s1_preprocces_view = s1_preprocces.map(add_ratio_lin).map(lin_to_db2)
+                visparam['bands'] = ['VV', 'VH', 'VVVH_ratio']
+                visparam['min'] = [-20, -25, 1]
+                visparam['max'] = [0, -5, 15]
             else:
-                if parameter['FORMAT'] == 'DB':
-                    s1_preprocces_view = s1_preprocces.map(lin_to_db)
-                    visparam['bands'] = parameter['POLARIZATION']
-                    visparam['min'] = -25
-                    visparam['max'] = 0
-                else:
-                    s1_preprocces_view = s1_preprocces
-                    visparam['bands'] = parameter['POLARIZATION']
-                    visparam['min'] = 0
-                    visparam['max'] = 0.2
+                s1_preprocces_view = s1_preprocces.map(add_ratio_lin)
+                visparam['bands'] = ['VV', 'VH', 'VVVH_ratio']
+                visparam['min'] = [0.01, 0.0032, 1.25]
+                visparam['max'] = [1, 0.31, 31.62]
+        else:
+            if parameter['FORMAT'] == 'DB':
+                s1_preprocces_view = s1_preprocces.map(lin_to_db)
+                visparam['bands'] = parameter['POLARIZATION']
+                visparam['min'] = -25
+                visparam['max'] = 0
+            else:
+                s1_preprocces_view = s1_preprocces
+                visparam['bands'] = parameter['POLARIZATION']
+                visparam['min'] = 0
+                visparam['max'] = 0.2
                     
-            #Map.addLayer(s1_preprocces_view.first(), visparam, 'Processed_image', True, 0.5)
+        dict_map = Map.to_dict()
+        
+        ide = dict_map['id']
+        name = 'map_'
+        complete = name + ide
+            
+        tile = dict_map['children']['openstreetmap']['id']
+        layer = 'tile_layer_'
+        complete2 = layer + tile
+            
+        keys = []
+        for i in dict_map['children'].keys():
+            keys.append(i)
+        complete3 = keys[1]
+            
+        draw = keys[3]
+            
+        complete4 = keys[5]
 
-            color_alert = 'White'
+        color_alert = 'White'
 
-            lam = None
+        lam = None
 
-            Map.add_to(figure)
+        Map.add_to(figure)
 
-            figure.render()
+        figure.render()
 
-            format_date = today_list1[0]
+        format_date = today_list1[0]
 
-            print(color_alert)
+        lote = 'Lote1'
 
-            return {"map": figure,
+        message = 'No'
+
+        return render(request, 'map.html', {"map": figure,
                     "actual_date" : format_date,
                     "color_alert" : color_alert,
-                    "lamina" : lam}
+                    "lamina" : lam,
+                    "lote": lote,
+                    "mapa": complete,
+                    "tile1": complete2,
+                    "tile2": complete3,
+                    "draw": draw,
+                    "tile3": complete4,
+                    "message": message})
 
 ## Definir poligono
 @login_required(login_url='/accounts/login/')
 def polygon(request):
-    user_name = request.user.get_username()
-    path = './media/'
-    directory_cont = os.listdir(path)
-
-    name_folders = []
-    for i in directory_cont:
-        name_folders.append(i)
-
-    if user_name not in name_folders:
-        new_dir = user_name
-        parent_dir = './media/'
-        path = os.path.join(parent_dir, new_dir)
-        os.mkdir(path)
-
     file = pd.read_excel('./media/excel/data.xlsx')
     file1 = pd.DataFrame(file)
     current_user = request.user.get_username()
@@ -455,12 +430,20 @@ def polygon(request):
             else:
                 continue
         else:
-            continue   
+            continue
+    if os.path.exists('./media/excel/polygon_draw.xlsx'):
+        new_coords_p = []
+        file2 = pd.read_excel('./media/excel/polygon_draw.xlsx')
+        file3 = pd.DataFrame(file2)
+
+        for i in range(len(file3)):
+            new_coords_p.append([file3['Longitude'][i], file3['Latitude'][i]])
+    else:
+        return redirect(to='map')
 
     if request.method == 'POST':
         form = PolygonForm(request.POST)
         if form.is_valid():
-            enter_polygon = form.cleaned_data['enter_polygon']
             name_polygon = form.cleaned_data['name_p']
 
             if name_polygon in lotes_disponibles:
@@ -468,16 +451,12 @@ def polygon(request):
                 return render(request, 'polygon.html', {'form':form, 'message': message})
             else:
                 user_name = request.user.get_username()
-
-                stud_obj = json.loads(enter_polygon)
-                new_coords_p = stud_obj['geometry']['coordinates'][0]
-
                 file = pd.read_excel('./media/excel/data.xlsx')
                 file1 = pd.DataFrame(file)
 
                 dataF = pd.DataFrame({'name_user': user_name,
-                        'name_polygon': name_polygon,
-                        'polygon_coords': new_coords_p})
+                            'name_polygon': name_polygon,
+                            'polygon_coords': new_coords_p})
 
                 data = pd.DataFrame({'id': [1], 'name_polygon': [name_polygon]})
                 data.to_excel('./media/excel/name_p.xlsx', index=False)
@@ -496,28 +475,18 @@ def polygon(request):
                 data_frame = pd.DataFrame({'Longitude': longitude, 'Latitude': latitude})
 
                 data_frame.to_excel('./media/excel/polygon.xlsx', index=False)
-                
+                    
+                os.remove('./media/excel/polygon_draw.xlsx')
+                    
                 return redirect(to = "map")
+                
     else:
         form = PolygonForm()
     
-    return render(request, 'polygon.html', {'form':form})
+    return render(request, 'polygon.html', {'form':form, 'polygon': new_coords_p})
 
 @login_required(login_url='/accounts/login/')
 def polygon2(request):
-    user_name = request.user.get_username()
-    path = './media/'
-    directory_cont = os.listdir(path)
-
-    name_folders = []
-    for i in directory_cont:
-        name_folders.append(i)
-
-    if user_name not in name_folders:
-        new_dir = user_name
-        parent_dir = './media/'
-        path = os.path.join(parent_dir, new_dir)
-        os.mkdir(path)
     if request.method == 'POST':
         form = Polygon2Form(request.POST)
         if form.is_valid():
@@ -559,20 +528,6 @@ def polygon2(request):
 ## Configurar punto
 @login_required(login_url='/accounts/login/')
 def save_polygon(request):
-    user_name = request.user.get_username()
-    path = './media/'
-    directory_cont = os.listdir(path)
-
-    name_folders = []
-    for i in directory_cont:
-        name_folders.append(i)
-
-    if user_name not in name_folders:
-        new_dir = user_name
-        parent_dir = './media/'
-        path = os.path.join(parent_dir, new_dir)
-        os.mkdir(path)
-
     file = pd.read_excel('./media/excel/data.xlsx')
     file1 = pd.DataFrame(file)
     current_user = request.user.get_username()

@@ -10,6 +10,7 @@
     <title>IS-SAR</title>
     <link rel="stylesheet" href="{% static 'style_map.css' %}">
     <link rel="icon" href="{% static 'colombia.png' %}">
+    <script src="https://unpkg.com/read-excel-file@4.x/bundle/read-excel-file.min.js"></script>
     {{ map.header.render|safe }}
 </head>
 <body>
@@ -40,7 +41,7 @@
                     <a href="{% url 'save_polygon' %}">
                         <div class="icons">
                             <i class='bx bxs-map' ></i>
-                            <span class="tooltiptext">Polígonos guardados</span>
+                            <span class="tooltiptext">Lotes guardados</span>
                         </div>
                     </a>
                 </div>
@@ -48,7 +49,7 @@
                     <a href="{% url 'polygon' %}">
                         <div class="icons">
                             <i class='bx bx-square'></i>
-                            <span class="tooltiptext">Dibujar polígono</span>
+                            <span class="tooltiptext">Dibujar lote</span>
                         </div>
                     </a>
                 </div>
@@ -163,12 +164,114 @@
             </div>
         </div>
     </div>
-
     <!-- Scripts de Javascript y Jquery -->
+    {% if message == 'Yes' %}
     <script> 
         {{ map.script.render | safe }}
     </script>
+    {% else %}
+    <script>
+        var Mapa = "{{mapa}}";
+        window[Mapa] = L.map(
+            "{{mapa}}",
+                {
+                    center: [4.3, -76.1],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 10,
+                    zoomControl: true,
+                    preferCanvas: false,
+                    pluginDraw: true,
+                    DrawExport: false,
+                    pluginLayercontrol: false,
+                    pluginLatlngpopup: false,
+                    eeInitialize: true,
+                    addGoogleMap: true,
+                    pluginFullscreen: true,
+                    pluginMinimap: false,
+                    locateControl: false,
+                }
+            );
+
+        var tile1 = "{{tile1}}";
+        window[tile1] = L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {"attribution": "Data by \u0026copy; \u003ca href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca href=\"http://www.openstreetmap.org/copyright\"\u003eODbL\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 24, "maxZoom": 24, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            ).addTo(window[Mapa]);
+        
+        var tile2 = "{{tile2}}";
+        window[tile2] = L.tileLayer(
+                "https://mt1.google.com/vt/lyrs=m\u0026x={x}\u0026y={y}\u0026z={z}",
+                {"attribution": "Google", "detectRetina": false, "maxNativeZoom": 22, "maxZoom": 22, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            ).addTo(window[Mapa]);
+        
+    
+        L.control.fullscreen(
+                {"forceSeparateButton": false, "position": "topleft", "title": "Full Screen", "titleCancel": "Exit Full Screen"}
+            ).addTo(window[Mapa]);
+        
+    
+        var options = {
+              position: "topleft",
+              draw: {},
+              edit: {},
+            }
+            // FeatureGroup is to store editable layers.
+        var drawnItems = new L.featureGroup().addTo(
+            window[Mapa]);
+
+        options.edit.featureGroup = drawnItems;
+            
+        var draw = "{{draw}}";
+
+        window[draw] = new L.Control.Draw(
+                options
+            ).addTo( window[Mapa] );
+
+        window[Mapa].on(L.Draw.Event.CREATED, function(e) {
+                var layer = e.layer,
+                    type = e.layerType;
+                var coords = JSON.stringify(layer.toGeoJSON());
+
+                $(document).ready(function() {
+                    $.ajax({
+                        method: 'GET',
+                        url: "{% url 'map' %}",
+                        data: {'data': coords},
+                        success: function (coords) {
+                            //this gets called when server returns an OK response
+                            console.log("it worked!");
+                        },
+                        error: function (data) {
+                            console.log("it didnt work");
+                        }
+                    });
+                });
+
+                console.log(coords)
+                layer.on('click', function() {
+                    alert('Ahora ve a dibujar polígono');
+                });
+                drawnItems.addLayer(layer);
+             });
+        window[Mapa].on('draw:created', function(e) {
+                drawnItems.addLayer(e.layer);
+            });
+    
+        window[Mapa].fitBounds(
+                [[4.3, -76.1], [4.3, -76.1]],
+                {"maxZoom": 10}
+            );
+        
+        var tile3 = "{{tile3}}";
+        window[tile3] = L.tileLayer(
+                "https://mt1.google.com/vt/lyrs=y\u0026x={x}\u0026y={y}\u0026z={z}",
+                {"attribution": "Google", "detectRetina": false, "maxNativeZoom": 22, "maxZoom": 22, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            ).addTo(window[Mapa]);    
+    </script>
+    {% endif %}
+    
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
     <script>
         document.getElementById('info').addEventListener("click", function() {
 	        document.querySelector('.bg-modal').style.display = "flex";

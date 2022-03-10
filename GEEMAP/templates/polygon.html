@@ -16,13 +16,13 @@
             <form action="" method="post" class="formulario">
                 {% csrf_token %}
                 <h2>
-                    Configurar poligono
+                    Configurar Lote
                 </h2>
                 <br>
-                Ingrese el poligono:  
+                Coordenadas del lote dibujado:  
                 <br>
                 <br>
-                {{ form.enter_polygon }}
+                {{ polygon }}
                 <br>
                 <br>
                 Nombre del poligono: 
@@ -30,13 +30,13 @@
                 {{ form.name_p }}
                 <br>
                 <br>
-                <input type="submit" value="configurar" class="button">
+                <input type="submit" value="Visualizar en mapa" class="button">
                 <br>
                 <br>
                 ¿Tienes las coordenadas? <a href="{% url 'polygon2' %}">Configuralo manualmente</a>
                 <br>
                 <br>
-                <a href="{% url 'save_polygon' %}">Ir a puntos guardados</a>
+                <a href="{% url 'save_polygon' %}">Ir a lotes guardados</a>
                 <br>
                 <br>
                 <a href="{% url 'map' %}">Volver al mapa</a>

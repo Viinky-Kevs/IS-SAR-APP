@@ -20,7 +20,7 @@
                     <br>
                     <br>
                         <h2>
-                            Polígonos dibujados de {{user.username}}
+                            Lotes dibujados de {{user.username}}
                         </h2>
                         <br>
                         <h3>Selecciona lote dibujado: </h3>
@@ -32,7 +32,7 @@
                         </select>
                         <br>
                         <br>
-                        <input type="submit" value="Cargar" class="button">                   
+                        <input type="submit" value="Visualizar en mapa" class="button">                   
                 </div>
             </div>
             <div class="container_a">
@@ -41,7 +41,7 @@
                     <br>
                     <br>
                         <h2>
-                            Polígonos cargados de {{ user.username }} 
+                            Lotes cargados de {{ user.username }} 
                         </h2>
                         <br>
                         <h3>Selecciona archivo cargado</h3>
@@ -53,13 +53,13 @@
                         </select>
                         <br>
                         <br>
-                        <input type="submit" value="Cargar" class="button">   
+                        <input type="submit" value="Visualizar en mapa" class="button">   
                 </div>
             </div>
         </form> 
     </div>
     <div style="display: flex; align-items: center; justify-content: center;">
-        <a href="{% url 'polygon' %}">Dibujar poligono</a>
+        <a href="{% url 'polygon' %}">Dibujar Lote</a>
     </div>
     <br>
     <div style="display: flex; align-items: center; justify-content: center;">
@@ -75,12 +75,12 @@
     </div>
     {% if message %}
     <script>
-        alert('Por favor selecciona solo un polígono')
+        alert('Por favor selecciona solo un lote')
     </script>
     {% endif %}
     {% if message1 %}
     <script>
-        alert('Por favor selecciona un polígono')
+        alert('Por favor selecciona un lote')
     </script>
     {% endif %}
 </body>
