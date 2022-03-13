@@ -370,7 +370,6 @@ input {
     right: 0;
     left: 0;
     z-index: 3;
-    top: 370px;
   }
 
   .containernav {
@@ -406,7 +405,7 @@ input {
     top: 100%;
     left: 50%;
     margin-left: 35px;
-    margin-top: 102px;
+    margin-top: 122px;
   }
 .container_a_1:hover .tooltiptext {
     visibility: visible;
@@ -425,7 +424,7 @@ input {
     position: absolute;
     z-index: 3;
     top: 100%;
-    margin-top: 148px;
+    margin-top: 168px;
     left: 50%;
     margin-left: 35px;
   }
@@ -446,7 +445,7 @@ input {
     position: absolute;
     z-index: 3;
     top: 100%;
-    margin-top: 194px;
+    margin-top: 214px;
     left: 50%;
     margin-left: 35px;
   }
@@ -467,7 +466,7 @@ input {
     position: absolute;
     z-index: 3;
     top: 100%;
-    margin-top: 240px;
+    margin-top: 260px;
     left: 50%;
     margin-left: 35px;
   }
@@ -488,7 +487,7 @@ input {
     position: absolute;
     z-index: 3;
     top: 100%;
-    margin-top: 286px;
+    margin-top: 306px;
     left: 50%;
     margin-left: 35px;
   }
@@ -509,7 +508,7 @@ input {
     position: absolute;
     z-index: 3;
     top: 100%;
-    margin-top: 332px;
+    margin-top: 352px;
     left: 50%;
     margin-left: 35px;
   }
@@ -530,7 +529,7 @@ input {
     position: absolute;
     z-index: 3;
     top: 100%;
-    margin-top: 378px;
+    margin-top: 398px;
     left: 50%;
     margin-left: 35px;
   }
@@ -544,6 +543,6 @@ input {
     margin: 5px;
 }
   .map {
-      height: 850px;
+      height: 100%;
   }
 }

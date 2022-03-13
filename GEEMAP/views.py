@@ -16,7 +16,6 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 
-from .helper import add_ratio_lin, lin_to_db2, lin_to_db
 from .wrapper import s1_preproc
 
 def Map(request):
@@ -125,31 +124,6 @@ def Map(request):
             return i.addBands(i.metadata('date2'))
 
         s1_preprocces_final = s1_preprocces.map(addTime)
-
-        visparam = {}
-
-        if parameter['POLARIZATION'] == 'VVVH':
-            if parameter['FORMAT'] == 'DB':
-                s1_preprocces_view = s1_preprocces.map(add_ratio_lin).map(lin_to_db2)
-                visparam['bands'] = ['VV', 'VH', 'VVVH_ratio']
-                visparam['min'] = [-20, -25, 1]
-                visparam['max'] = [0, -5, 15]
-            else:
-                s1_preprocces_view = s1_preprocces.map(add_ratio_lin)
-                visparam['bands'] = ['VV', 'VH', 'VVVH_ratio']
-                visparam['min'] = [0.01, 0.0032, 1.25]
-                visparam['max'] = [1, 0.31, 31.62]
-        else:
-            if parameter['FORMAT'] == 'DB':
-                s1_preprocces_view = s1_preprocces.map(lin_to_db)
-                visparam['bands'] = parameter['POLARIZATION']
-                visparam['min'] = -25
-                visparam['max'] = 0
-            else:
-                s1_preprocces_view = s1_preprocces
-                visparam['bands'] = parameter['POLARIZATION']
-                visparam['min'] = 0
-                visparam['max'] = 0.2
                     
         def Centroid(array):
             length = array.shape[0]
@@ -270,17 +244,44 @@ def Map(request):
             lam = 0
             color_alert = 'Green'
         
-        sentinel1 = ee.Image(ee.ImageCollection('COPERNICUS/S1_GRD') 
+        sentinel = ee.Image(ee.ImageCollection('COPERNICUS/S1_GRD') 
                        .filterBounds(geometry_user) 
-                       .filterDate(ee.Date('2022-02-11'), ee.Date('2022-02-23')) 
+                       .filterDate(ee.Date(before_list1[0]), ee.Date(today_list1[0])) 
                        .first() 
                        .clip(geometry_user))
         
-        Map.addLayer(sentinel1, {'min': [-20, -25, 1], 'max': [0, -5, 15]}, 'Plygon image', True)
-
-        Map.addLayer(geometry_user, {'color': 'FF0000'}, 'geodesic polygon', True, 0.2)
+        Map.addLayer(sentinel, {'min': [-20, -25, 1], 'max': [0, -5, 15]}, 'Plygon image', True)
 
         Map.setCenter(centroide[0],centroide[1], zoom = 16)
+
+        dict_map = Map.to_dict()
+
+        ide = dict_map['id']
+        name = 'map_'
+        complete = name + ide
+            
+        tile = dict_map['children']['openstreetmap']['id']
+        layer = 'tile_layer_'
+        tile1 = layer + tile
+            
+        keys = []
+        for i in dict_map['children'].keys():
+            keys.append(i)
+
+        tile2 = keys[1]
+            
+        draw = keys[3]
+            
+        tile3 = keys[5]
+
+        tile4 = keys[6]
+
+        html = Map.to_html()
+
+        link = html[6288:6447]
+        link = str(link)
+
+        print(link)
 
         Map.add_to(figure)
     
@@ -295,7 +296,16 @@ def Map(request):
                     "color_alert" : color_alert,
                     "lamina" : round(lam, 2),
                     'name': name_p,
-                    "message": message})
+                    "message": message,
+                    "mapa": complete,
+                    "tile1": tile1,
+                    "tile2": tile2,
+                    "draw": draw,
+                    "tile3": tile3,
+                    "tile4": tile4,
+                    "coords1": str(centroide[1]),
+                    "coords2": str(centroide[0]),
+                    "link" : link})
             
     else:
         geometry = ee.Geometry.Polygon(
@@ -345,31 +355,6 @@ def Map(request):
             return i.addBands(i.metadata('date2'))
 
         s1_preprocces_final = s1_preprocces.map(addTime)
-
-        visparam = {}
-
-        if parameter['POLARIZATION'] == 'VVVH':
-            if parameter['FORMAT'] == 'DB':
-                s1_preprocces_view = s1_preprocces.map(add_ratio_lin).map(lin_to_db2)
-                visparam['bands'] = ['VV', 'VH', 'VVVH_ratio']
-                visparam['min'] = [-20, -25, 1]
-                visparam['max'] = [0, -5, 15]
-            else:
-                s1_preprocces_view = s1_preprocces.map(add_ratio_lin)
-                visparam['bands'] = ['VV', 'VH', 'VVVH_ratio']
-                visparam['min'] = [0.01, 0.0032, 1.25]
-                visparam['max'] = [1, 0.31, 31.62]
-        else:
-            if parameter['FORMAT'] == 'DB':
-                s1_preprocces_view = s1_preprocces.map(lin_to_db)
-                visparam['bands'] = parameter['POLARIZATION']
-                visparam['min'] = -25
-                visparam['max'] = 0
-            else:
-                s1_preprocces_view = s1_preprocces
-                visparam['bands'] = parameter['POLARIZATION']
-                visparam['min'] = 0
-                visparam['max'] = 0.2
                     
         dict_map = Map.to_dict()
         
