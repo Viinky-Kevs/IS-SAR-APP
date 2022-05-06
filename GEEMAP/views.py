@@ -77,7 +77,11 @@ def Map(request):
                          plugin_LatLngPopup = False)
                          
     Map.add_basemap('HYBRID')
-        
+
+    aguacate = geemap.shp_to_ee('./media/shapefiles_admin/Aguacate/PPA_dissolved.shp')
+    Map.addLayer(aguacate, {}, 'Zona aguacate',shown=True, opacity=0.5)
+    
+    Map.addLayerControl() 
     if Draw_in_map == True:
         name_p = name_polygon            
         geometry_user = ee.Geometry.Polygon([new_coords])
