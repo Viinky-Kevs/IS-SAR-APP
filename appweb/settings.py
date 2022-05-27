@@ -13,8 +13,6 @@ DEBUG = False
 #ALLOWED_HOSTS = []
 ALLOWED_HOSTS = ['www.is-sar.com', '146.190.26.203', 'localhost']
 
-# Application definition
-
 INSTALLED_APPS = [
     'GEEMAP',
     'django.contrib.admin',
