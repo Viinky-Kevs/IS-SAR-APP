@@ -77,11 +77,10 @@ def Map(request):
                          plugin_LatLngPopup = False)
                          
     Map.add_basemap('HYBRID')
-
-    aguacate = geemap.shp_to_ee('./media/shapefiles_admin/Aguacate/PPA_dissolved.shp')
-    Map.addLayer(aguacate, {}, 'Zona aguacate',shown=True, opacity=0.5)
+    avocato_file = './media/shapefiles_admin/Aguacate/PPA_dissolved.shp'
+    layer = geemap.shp_to_ee(avocato_file)
+    Map.addLayer(layer, {}, 'Aguacate')
     
-    Map.addLayerControl() 
     if Draw_in_map == True:
         name_p = name_polygon            
         geometry_user = ee.Geometry.Polygon([new_coords])
@@ -255,11 +254,10 @@ def Map(request):
                        .clip(geometry_user))
         
         Map.addLayer(sentinel, {'min': [-20, -25, 1], 'max': [0, -5, 15]}, 'Plygon image', True)
-
+        
         Map.setCenter(centroide[0],centroide[1], zoom = 16)
 
         dict_map = Map.to_dict()
-
         ide = dict_map['id']
         name = 'map_'
         complete = name + ide
@@ -280,13 +278,14 @@ def Map(request):
 
         tile4 = keys[6]
 
-        html = Map.to_html()
+        tile5 = keys[7]
 
+        html = Map.to_html()
+        #print()
         link = html[6288:6447]
         link = str(link)
-
-        print(link)
-
+        link2 = html[6811:6970]
+        link2 = str(link2)
         Map.add_to(figure)
     
         figure.render()
@@ -307,9 +306,11 @@ def Map(request):
                     "draw": draw,
                     "tile3": tile3,
                     "tile4": tile4,
+                    "tile5": tile5,
                     "coords1": str(centroide[1]),
                     "coords2": str(centroide[0]),
-                    "link" : link})
+                    "link" : link,
+                    "link2" : link2})
             
     else:
         geometry = ee.Geometry.Polygon(
@@ -359,7 +360,7 @@ def Map(request):
             return i.addBands(i.metadata('date2'))
 
         s1_preprocces_final = s1_preprocces.map(addTime)
-                    
+
         dict_map = Map.to_dict()
         
         ide = dict_map['id']
@@ -373,15 +374,23 @@ def Map(request):
         keys = []
         for i in dict_map['children'].keys():
             keys.append(i)
+
         complete3 = keys[1]
             
         draw = keys[3]
             
         complete4 = keys[5]
 
+        complete5 = keys[6]
+
         color_alert = 'White'
 
         lam = None
+
+        html = Map.to_html()
+
+        link = html[6288:6447]
+        link = str(link)
 
         Map.add_to(figure)
 
@@ -403,7 +412,9 @@ def Map(request):
                     "tile2": complete3,
                     "draw": draw,
                     "tile3": complete4,
-                    "message": message})
+                    "tile4" : complete5,
+                    "message": message,
+                    "link" : link})
 
 ## Definir poligono
 @login_required(login_url='/accounts/login/')
