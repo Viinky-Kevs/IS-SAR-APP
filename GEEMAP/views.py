@@ -164,7 +164,7 @@ def Map(request):
                 }  
             ]
             }
-
+        print(centroide)
         geojsonFc = ee.FeatureCollection(geojson_test)
             
         def images(img):
@@ -176,7 +176,7 @@ def Map(request):
 
         VH = table_info['features'][0]['properties']['VH']
         angle = table_info['features'][0]['properties']['angle']
-            
+        print(VH, angle)   
         def sm_wcm(sigma0, theta):
             A = 85.71200708
             B = -32.46500098

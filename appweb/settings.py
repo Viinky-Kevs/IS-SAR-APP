@@ -8,10 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-t23q)%60#1s05e%@1ly4($)xuz0(_7^(3_g2(q5uo6q^43!y&9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-#DEBUG = True
-#ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['www.is-sar.com', '159.223.15.244', 'localhost']
+#DEBUG = False
+DEBUG = True
+ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = ['www.is-sar.com', '159.223.15.244', 'localhost']
 
 INSTALLED_APPS = [
     'GEEMAP',
