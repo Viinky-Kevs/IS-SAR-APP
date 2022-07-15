@@ -197,11 +197,12 @@ def Map(request):
             
         model_5 = sm_wcm(sigma0 = VH, theta = angle)
             
-        def theta_0_5_to_0_60(theta_0_5, lat, long):
-            theta_0_60 = 0.22318 * theta_0_5 - 1.18155 * lat  +2.27015 * long + 178.43681
+        def theta_0_5_to_0_60(theta_0_5):
+            #theta_0_60 = 0.22318 * theta_0_5 - 1.18155 * lat  +2.27015 * long + 178.43681
+            theta_0_60 = 0.637 * theta_0_5 + 0.090
             return theta_0_60
             
-        model_60 = theta_0_5_to_0_60(theta_0_5 = model_5, lat = centroide[1], long = centroide[0])
+        model_60 = theta_0_5_to_0_60(theta_0_5 = model_5)
             
         shapefile = gpd.read_file('./media/shapefiles_admin/FC_PWP_v2_map_geo.shp')
 
