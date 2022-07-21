@@ -234,7 +234,7 @@ def Map(request):
             
         theta_PWP = shapefile["PMP"][counter] /100
         
-        #print(f'modelo a 60cm: {model_60} y capacidad de campo: {theta_FC}')
+        print(f'modelo a 60cm: {model_60} y capacidad de campo: {theta_FC}')
 
         if model_60 <= theta_FC:
             taw = theta_FC - theta_PWP
