@@ -19,7 +19,9 @@ import geopandas as gpd
 from .wrapper import s1_preproc
 
 def Map(request):
-    ee.Initialize()
+    service_account = 'issar-293@halogen-oxide-348416.iam.gserviceaccount.com'
+    credentials = ee.ServiceAccountCredentials(service_account, './GEEMAP/keyee.json')
+    ee.Initialize(credentials)
 
     if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
         data = request.GET
