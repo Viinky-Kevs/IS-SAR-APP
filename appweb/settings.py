@@ -10,7 +10,7 @@ SECRET_KEY = 'django-insecure-t23q)%60#1s05e%@1ly4($)xuz0(_7^(3_g2(q5uo6q^43!y&9
 # SECURITY WARNING: don't run with debug turned on in production!
 #DEBUG = False
 DEBUG = False
-ALLOWED_HOSTS = ['www.is-sar.com', '159.203.136.81', 'localhost']
+ALLOWED_HOSTS = ['www.is-sar.com', '134.209.36.67', 'localhost']
 #ALLOWED_HOSTS = ['www.is-sar.com', '159.223.15.244', 'localhost']
 
 INSTALLED_APPS = [
