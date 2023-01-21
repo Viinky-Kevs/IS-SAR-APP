@@ -19,10 +19,10 @@ import geopandas as gpd
 from .wrapper import s1_preproc
 
 def Map(request):
-    service_account = 'issar-293@halogen-oxide-348416.iam.gserviceaccount.com'
-    credentials = ee.ServiceAccountCredentials(service_account, './GEEMAP/keyee.json')
-    ee.Initialize(credentials)
-
+    
+    ee.Initialize()
+    
+    #ee.Initialize()
     if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
         data = request.GET
         data1 = dict(data)
@@ -166,7 +166,7 @@ def Map(request):
                 }  
             ]
             }
-        print(centroide)
+        
         geojsonFc = ee.FeatureCollection(geojson_test)
             
         def images(img):
@@ -178,7 +178,7 @@ def Map(request):
 
         VH = table_info['features'][0]['properties']['VH']
         angle = table_info['features'][0]['properties']['angle']
-        print(VH, angle)   
+          
         def sm_wcm(sigma0, theta):
             A = 85.71200708
             B = -32.46500098
@@ -235,8 +235,6 @@ def Map(request):
         theta_FC = shapefile["CC"][counter] / 100
             
         theta_PWP = shapefile["PMP"][counter] /100
-        
-        print(f'modelo a 60cm: {model_60} y capacidad de campo: {theta_FC}')
 
         if model_60 <= theta_FC:
             taw = theta_FC - theta_PWP
@@ -279,17 +277,16 @@ def Map(request):
             
         draw = keys[3]
             
-        tile3 = keys[5]
+        tile3 = keys[8]
 
         tile4 = keys[6]
 
         tile5 = keys[7]
 
         html = Map.to_html()
-        #print()
-        link = html[6288:6447]
+        link = html[6966:7125]
         link = str(link)
-        link2 = html[6811:6970]
+        link2 = html[7489:7648]
         link2 = str(link2)
         Map.add_to(figure)
     
@@ -384,7 +381,7 @@ def Map(request):
             
         draw = keys[3]
             
-        complete4 = keys[5]
+        complete4 = keys[7]
 
         complete5 = keys[6]
 
@@ -394,7 +391,7 @@ def Map(request):
 
         html = Map.to_html()
 
-        link = html[6288:6447]
+        link = html[6966:7125]
         link = str(link)
 
         Map.add_to(figure)
@@ -416,8 +413,8 @@ def Map(request):
                     "tile1": complete2,
                     "tile2": complete3,
                     "draw": draw,
-                    "tile3": complete4,
-                    "tile4" : complete5,
+                    "tile3": complete5,
+                    "tile4" : complete4,
                     "message": message,
                     "link" : link})
 
