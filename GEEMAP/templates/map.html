@@ -63,7 +63,7 @@
                 </div>
                 {% if user.is_authenticated %}
                 <div class="container_a_5">
-                    <a href="#" id="ppc" class="ppc">
+                    <a href="#" id="riego" class="riego">
                         <div class="icons">
                             <i class='bx bx-cloud-rain'></i>
                             <span class="tooltiptext">Calcular riego</span>
@@ -250,18 +250,24 @@
             drawnItems.addLayer(e.layer);
         });
 
+        L.Control.geocoder(
+            {"collapsed": true, "defaultMarkGeocode": true, "position": "topright"}
+        ).on('markgeocode', function(e) {
+            window[Mapa].setView(e.geocode.center, 11);
+        }).addTo(window[Mapa]);
+
         window[Mapa].fitBounds(
             [[4.3, -76.1], [4.3, -76.1]],
             {"maxZoom": 10}
         );
     
-        var tile3 = "{{tile3}}";
+        var tile3 = "{{tile4}}";
         window[tile3] = L.tileLayer(
             "https://mt1.google.com/vt/lyrs=y\u0026x={x}\u0026y={y}\u0026z={z}",
             {"attribution": "Google", "detectRetina": false, "maxNativeZoom": 22, "maxZoom": 22, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
         ).addTo(window[Mapa]);
     
-        var tile4 = "{{tile4}}";
+        var tile4 = "{{tile5}}";
         var link = "{{link}}";
         window[tile4] = L.tileLayer(
             link,
@@ -287,6 +293,7 @@
     
     </script>
     {% else %}
+
     <script>
         var Mapa = "{{mapa}}";
         window[Mapa] = L.map(
@@ -371,6 +378,12 @@
         window[Mapa].on('draw:created', function(e) {
                 drawnItems.addLayer(e.layer);
             });
+
+        L.Control.geocoder(
+            {"collapsed": true, "defaultMarkGeocode": true, "position": "toprigth"}
+        ).on('markgeocode', function(e) {
+            window[Mapa].setView(e.geocode.center, 11);
+        }).addTo(window[Mapa]);
     
         window[Mapa].fitBounds(
                 [[4.3, -76.1], [4.3, -76.1]],
@@ -389,8 +402,10 @@
             link,
             {"attribution": "Google Earth Engine", "detectRetina": false, "maxNativeZoom": 24, "maxZoom": 24, "minZoom": 0, "noWrap": false, "opacity": 1.0, "subdomains": "abc", "tms": false}
         ).addTo(window[Mapa]);   
-    </script>
+    </script> 
+    
     {% endif %}
+    
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
@@ -405,7 +420,7 @@
     </script>
 
     <script>
-        document.getElementById('ppc').addEventListener("click", function() {
+        document.getElementById('riego').addEventListener("click", function() {
             document.querySelector('.bg-modal1').style.display = "flex";
         });
 
